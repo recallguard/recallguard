@@ -1,0 +1,97 @@
+<!-- emails/pro_upgrade_offer.html
+     =============================================================
+     Marketing email that nudges free‑tier users to upgrade to RecallGuard
+     **Pro**.  The template uses a single‑column layout, bullet‑proof
+     VML buttons for Outlook, and fully inlined styles for maximum
+     client compatibility.
+
+     Placeholders (double‑curly braces) are rendered via Jinja2 before the
+     message is sent.
+-->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upgrade to RecallGuard Pro</title>
+    <style>
+      /* RESET -------------------------------------------------------------- */
+      body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+      table { border-collapse: collapse !important; }
+      body { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f2f4f6; }
+
+      /* CLIENT-SPECIFIC ---------------------------------------------------- */
+      @media screen and (max-width: 600px) {
+        .wrapper { width: 100% !important; }
+        .mobile-center { text-align: center !important; }
+        .stack-column, .stack-column-center { display: block !important; width: 100% !important; max-width: 100% !important; direction: ltr !important; }
+        .stack-column-center { text-align: center !important; }
+      }
+    </style>
+  </head>
+  <body style="background-color:#f2f4f6;">
+    <center style="width:100%; background:#f2f4f6; padding:40px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;" class="wrapper">
+        <tr>
+          <td style="background:#ffffff; border-radius:8px; padding:40px; font-family:Helvetica,Arial,sans-serif;">
+            <!-- Header -------------------------------------------------- -->
+            <h1 style="margin:0 0 20px 0; font-size:24px; color:#333333;">Hi {{ user_name }},</h1>
+            <p style="margin:0 0 20px 0; font-size:16px; line-height:1.5; color:#51545E;">
+              We noticed you’ve been keeping your products safe with RecallGuard’s free tier. 🔒  Did you know
+              you could unlock <strong>24&#x2F;7 real‑time monitoring</strong>, <strong>SMS alerts</strong>, and advanced analytics
+              by upgrading to <span style="color:#ea580c; font-weight:bold;">RecallGuard&nbsp;Pro</span>?
+            </p>
+
+            <!-- Feature list ------------------------------------------- -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+              <tr>
+                <td style="font-size:16px; line-height:1.5; color:#51545E;">
+                  <ul style="padding-left:20px; margin:0;">
+                    <li><strong>Instant push & SMS alerts</strong> – know about recalls the moment they drop.</li>
+                    <li><strong>Unlimited product tracking</strong> – add every device, toy, or appliance in your home.</li>
+                    <li><strong>Weekly safety digest</strong> – stay informed with a concise report in your inbox.</li>
+                    <li><strong>Priority support</strong> – jump the queue whenever you need help.</li>
+                  </ul>
+                </td>
+              </tr>
+            </table>
+
+            <!-- CTA Button (Bullet‑proof) ------------------------------ -->
+            <table role="presentation" cellspacing="0" cellpadding="0" width="100%" style="margin:30px 0;">
+              <tr>
+                <td class="mobile-center" style="text-align:center;">
+                  <!--[if mso]>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                    href="{{ upgrade_url }}" style="height:44px; v-text-anchor:middle; width:220px;" arcsize="8%" strokecolor="#ea580c" fillcolor="#ea580c">
+                    <w:anchorlock/>
+                    <center style="color:#ffffff; font-family:Helvetica, Arial,sans-serif; font-size:16px; font-weight:bold;">Upgrade&nbsp;Now</center>
+                  </v:roundrect>
+                  <![endif]-->
+                  <!--[if !mso]><!-- -->
+                  <a href="{{ upgrade_url }}" target="_blank" style="background:#ea580c; border-radius:4px; color:#ffffff; display:inline-block; font-family:Helvetica,Arial,sans-serif; font-size:16px; font-weight:bold; line-height:44px; text-align:center; text-decoration:none; width:220px; -webkit-text-size-adjust:none;">Upgrade&nbsp;Now →</a>
+                  <!--<![endif]-->
+                </td>
+              </tr>
+            </table>
+
+            <!-- Price blurb -------------------------------------------- -->
+            <p style="margin:0 0 10px 0; font-size:14px; color:#51545E;">
+              <em>Special offer:</em> Upgrade in the next <strong>48&nbsp;hours</strong> and lock‑in Pro for just
+              <span style="color:#ea580c; font-weight:bold;">{{ promo_price }}</span>/month (regular {{ regular_price }}/month).
+            </p>
+
+            <!-- Footer -------------------------------------------------- -->
+            <p style="margin:40px 0 0 0; font-size:12px; line-height:1.5; color:#A8AAAF;">
+              You’re receiving this email because you created a free RecallGuard account with {{ user_email }}.<br/>
+              If you’d rather not receive marketing emails like this, you can
+              <a href="{{ unsubscribe_url }}" style="color:#6B7280;">unsubscribe here</a> or adjust your
+              <a href="{{ preferences_url }}" style="color:#6B7280;">email preferences</a>.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </center>
+  </body>
+</html>
