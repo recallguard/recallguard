@@ -1,18 +1,9 @@
-
-"""Fetch food recall data from the FDA enforcement API.
-
-This module retrieves recent food recalls from the public FDA API. Results are
-cached to ``data/fda_cache.json`` so the application can operate without
-network access. Each recall entry is normalized to include ``id``, ``title``,
-``hazard``, ``recall_date``, and ``url``.
-"""
-
+"""Fetch food recall data from the FDA enforcement API."""
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, List
 import json
-
 import requests
 
 API_URL = (
@@ -23,35 +14,27 @@ CACHE_FILE = Path(__file__).resolve().parents[3] / "data" / "fda_cache.json"
 
 
 def _parse(records: List[Dict]) -> List[Dict]:
-    """Normalize raw FDA records to RecallGuard's schema."""
     parsed: List[Dict] = []
     for r in records:
         recall_id = r.get("recall_number") or r.get("event_id")
-        parsed.append(
-            {
-                "source": "FDA",
-                "id": recall_id,
-                "title": r.get("product_description"),
-                "hazard": r.get("reason_for_recall"),
-                "recall_date": r.get("recall_initiation_date") or r.get("report_date"),
-                "url": r.get("more_code_info")
-                or f"https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/{recall_id}",
-            }
-        )
+        parsed.append({
+            "source": "fda",
+            "id": recall_id,
+            "title": r.get("product_description"),
+            "hazard": r.get("reason_for_recall"),
+            "recall_date": r.get("recall_initiation_date") or r.get("report_date"),
+            "url": r.get("more_code_info") or f"https://www.fda.gov/{recall_id}",
+        })
     return parsed
 
 
 def fetch() -> List[Dict]:
-    """Return a list of FDA recalls using a cached fallback."""
     try:
         response = requests.get(API_URL, timeout=10)
         response.raise_for_status()
         data = response.json().get("results", [])
         parsed = _parse(data)
-        try:
-            CACHE_FILE.write_text(json.dumps(data), encoding="utf-8")
-        except Exception:
-            pass
+        CACHE_FILE.write_text(json.dumps(data), encoding="utf-8")
         return parsed
     except Exception:
         if CACHE_FILE.exists():
@@ -61,15 +44,3 @@ def fetch() -> List[Dict]:
             except Exception:
                 return []
         return []
-
-"""Fetch recalls from the FDA API."""
-from typing import List, Dict
-
-
-def fetch() -> List[Dict]:
-    """Return a list of FDA recalls.
-
-    Placeholder implementation that would fetch data from the FDA API.
-    """
-    return [{"source": "FDA", "title": "FDA recall", "product": "Medication"}]
-

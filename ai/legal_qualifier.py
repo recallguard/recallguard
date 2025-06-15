@@ -5,6 +5,6 @@ TEMPLATE_PATH = Path(__file__).parent / "prompt_templates" / "legal_referral_pro
 
 
 def needs_referral(notice: str) -> bool:
-    template = TEMPLATE_PATH.read_text()
+    TEMPLATE_PATH.read_text()
     return "injury" in notice.lower()
 

@@ -10,3 +10,11 @@ CREATE TABLE products (
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
+CREATE TABLE recalls (
+    id INTEGER PRIMARY KEY,
+    product TEXT NOT NULL,
+    hazard TEXT,
+    recall_date TEXT,
+    source TEXT
+);
+

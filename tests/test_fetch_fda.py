@@ -1,7 +1,7 @@
-from backend.api.recalls import fetch_fda
-import requests
 from pathlib import Path
 import json
+import requests
+from backend.api.recalls import fetch_fda
 
 
 DATA_FILE = Path(__file__).resolve().parents[1] / "data" / "fda_cache.json"
