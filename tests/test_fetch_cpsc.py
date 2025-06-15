@@ -11,3 +11,5 @@ def test_fetch_cpsc(monkeypatch):
     recalls = fetch_cpsc()
     assert len(recalls) >= 1
     assert any(r["product"] == "Widget" for r in recalls)
+    assert any(r["hazard"] == "Fire" for r in recalls)
+    assert any(r["recall_date"] == "2024-04-01" for r in recalls)

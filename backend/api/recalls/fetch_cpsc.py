@@ -20,16 +20,31 @@ DATA_FILE = Path(__file__).resolve().parents[3] / "data" / "cpsc_sample.json"
 
 def _parse(records: List[Dict]) -> List[Dict]:
     """Normalize recall records to a consistent structure."""
-    return [
-        {
-            "source": "CPSC",
-            "id": r.get("RecallID"),
-            "title": r.get("Title"),
-            "product": r.get("Product"),
-            "url": r.get("URL"),
-        }
-        for r in records
-    ]
+    parsed: List[Dict] = []
+    for r in records:
+        hazards = r.get("Hazards") or r.get("Hazard")
+        hazard = None
+        if isinstance(hazards, list) and hazards:
+            hazard = hazards[0].get("Name")
+        elif isinstance(hazards, str):
+            hazard = hazards
+        product = r.get("Product")
+        if not product:
+            prods = r.get("Products")
+            if isinstance(prods, list) and prods:
+                product = prods[0].get("Name")
+        parsed.append(
+            {
+                "source": "CPSC",
+                "id": r.get("RecallID"),
+                "title": r.get("Title"),
+                "product": product,
+                "hazard": hazard,
+                "recall_date": r.get("RecallDate"),
+                "url": r.get("URL"),
+            }
+        )
+    return parsed
 
 
 def fetch() -> List[Dict]:
