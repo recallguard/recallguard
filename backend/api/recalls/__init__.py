@@ -1,3 +1,4 @@
+
 """Recall fetcher utilities."""
 
 from .fetch_cpsc import fetch as fetch_cpsc
@@ -13,3 +14,5 @@ def fetch_all() -> list:
     for func in (fetch_cpsc, fetch_fda, fetch_usda, fetch_nhtsa, fetch_misc):
         recalls.extend(func())
     return recalls
+
+
