@@ -1,6 +1,7 @@
 # RecallGuard
 
 
+Initialize the SQLite database with `python -m backend.db`.
 RecallGuard monitors product recalls and alerts users across web and mobile
 interfaces. This repository now includes a small sample backend with tests and
 a front‑end skeleton using React. Mobile apps can be built using React Native

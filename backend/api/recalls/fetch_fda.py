@@ -1,7 +1,49 @@
 
-"""Fetch food recall data from the FDA enforcement API.
+from __future__ import annotations
 
-This module retrieves recent food recalls from the public FDA API. Results are
+from datetime import date
+from sqlalchemy import select
+
+from backend.db.models import Recall
+from backend.utils.db import get_session
+def _store(records: List[Dict]) -> List[Recall]:
+    """Upsert parsed recalls into the database and return ORM objects."""
+    recalls: List[Recall] = []
+    with get_session() as session:
+        for r in records:
+            rd: date | None = None
+            if r.get("recall_date"):
+                try:
+                    rd = date.fromisoformat(str(r["recall_date"]))
+                except ValueError:
+                    rd = None
+            stmt = select(Recall).where(
+                Recall.source == r["source"],
+                Recall.product == r["title"],
+                Recall.recall_date == rd,
+            )
+            obj = session.scalars(stmt).first()
+            if obj:
+                obj.hazard = r.get("hazard")
+                obj.details_url = r.get("url")
+                obj.raw_json = json.dumps(r)
+            else:
+                obj = Recall(
+                    source=r["source"],
+                    product=r["title"],
+                    hazard=r.get("hazard"),
+                    recall_date=rd,
+                    details_url=r.get("url"),
+                    raw_json=json.dumps(r),
+                )
+                session.add(obj)
+            recalls.append(obj)
+    return recalls
+
+
+def fetch() -> List[Recall]:
+        return _store(parsed)
+                return _store(_parse(data))
 cached to ``data/fda_cache.json`` so the application can operate without
 network access. Each recall entry is normalized to include ``id``, ``title``,
 ``hazard``, ``recall_date``, and ``url``.

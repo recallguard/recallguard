@@ -1,7 +1,13 @@
+from pathlib import Path
 from backend.api.app import create_app, USER_ITEMS
+from backend.utils.db import ENGINE
 
 
 def test_app_routes():
+    db = Path("dev.db")
+    ENGINE.dispose()
+    if db.exists():
+        db.unlink()
     app = create_app()
     client = app.test_client()
 

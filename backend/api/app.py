@@ -2,12 +2,14 @@ from flask import Flask, jsonify, request
 
 from .recalls import fetch_all
 from .alerts import check_user_items, generate_summary
+from backend.db import create_tables
 
 # simple in-memory store for user items
 USER_ITEMS = []
 
 
 def create_app() -> Flask:
+    create_tables()
     app = Flask(__name__)
 
     @app.get('/recalls')
@@ -24,8 +26,8 @@ def create_app() -> Flask:
 
     @app.get('/alerts')
     def alerts_route():
-        recalls = fetch_all()
-        matches = check_user_items.check_user_items(USER_ITEMS, recalls)
+        fetch_all()
+        matches = check_user_items.check_user_items(USER_ITEMS)
         summaries = [generate_summary.generate_summary({'title': 'Recall', 'product': m}) for m in matches]
         return jsonify({'alerts': summaries})
 
