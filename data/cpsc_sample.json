@@ -2,4 +2,30 @@
   {"RecallID": 1, "Title": "Widget recall due to fire hazard", "Product": "Widget", "URL": "https://example.com/recall1"},
   {"RecallID": 2, "Title": "Gadget recall due to choking hazard", "Product": "Gadget", "URL": "https://example.com/recall2"},
   {"RecallID": 3, "Title": "Toy recall due to lead paint", "Product": "Toy", "URL": "https://example.com/recall3"}
+
+  {
+    "RecallID": 1,
+    "Title": "Widget recall due to fire hazard",
+    "Product": "Widget",
+    "Hazard": "Fire",
+    "RecallDate": "2024-04-01",
+    "URL": "https://example.com/recall1"
+  },
+  {
+    "RecallID": 2,
+    "Title": "Gadget recall due to choking hazard",
+    "Product": "Gadget",
+    "Hazard": "Choking",
+    "RecallDate": "2024-05-15",
+    "URL": "https://example.com/recall2"
+  },
+  {
+    "RecallID": 3,
+    "Title": "Toy recall due to lead paint",
+    "Product": "Toy",
+    "Hazard": "Lead",
+    "RecallDate": "2024-06-10",
+    "URL": "https://example.com/recall3"
+  }
+
 ]

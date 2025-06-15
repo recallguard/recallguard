@@ -1,3 +1,12 @@
+
+"""Run the RecallGuard development server."""
+from backend.api.app import create_app
+
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True)
+
 """Example entry point for RecallGuard."""
 from backend.api.recalls import fetch_all
 from backend.api.alerts import check_user_items, generate_summary, send_email_alert
@@ -14,4 +23,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
