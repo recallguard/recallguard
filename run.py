@@ -8,12 +8,12 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 """Example entry point for RecallGuard."""
-from backend.api.recalls import fetch_cpsc
+from backend.api.recalls import fetch_all
 from backend.api.alerts import check_user_items, generate_summary, send_email_alert
 
 
 def main():
-    recalls = fetch_cpsc.fetch()
+    recalls = fetch_all()
     items = ["Widget"]
     matches = check_user_items.check_user_items(items, recalls)
     for match in matches:

@@ -1,3 +1,12 @@
+
+from backend.api.recalls.fetch_cpsc import fetch
+
+
+def test_fetch_cpsc():
+    recalls = fetch()
+    assert len(recalls) >= 1
+    assert any(r["product"] == "Widget" for r in recalls)
+
 from backend.api.recalls import fetch_cpsc
 import requests
 
@@ -13,3 +22,4 @@ def test_fetch_cpsc(monkeypatch):
     assert any(r["product"] == "Widget" for r in recalls)
     assert any(r["hazard"] == "Fire" for r in recalls)
     assert any(r["recall_date"] == "2024-04-01" for r in recalls)
+
