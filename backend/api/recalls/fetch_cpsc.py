@@ -1,40 +1,20 @@
-
-"""Fetch recalls from the CPSC API.
-
-This sample implementation reads from a local JSON file to avoid network
-dependencies. In a production system this module would perform authenticated
-requests to the official CPSC API and return the latest recalls.
-"""
+"""Fetch recalls from the CPSC API with a local fallback."""
+from __future__ import annotations
 
 from pathlib import Path
-
-
-"""Fetch recalls from the CPSC recall API.
-
-This module attempts to retrieve live recall data from
-``saferproducts.gov``. If the request fails (for example when running in an
-environment without external network access), it falls back to sample data
-stored locally in ``data/cpsc_sample.json``. The returned records are
-normalized to a common schema used throughout RecallGuard.
-"""
-
-from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 import json
-
 import requests
-
 
 API_URL = "https://www.saferproducts.gov/RestWebServices/Recall?format=json"
 DATA_FILE = Path(__file__).resolve().parents[3] / "data" / "cpsc_sample.json"
 
 
 def _parse(records: List[Dict]) -> List[Dict]:
-    """Normalize recall records to a consistent structure."""
     parsed: List[Dict] = []
     for r in records:
-        hazards = r.get("Hazards") or r.get("Hazard")
         hazard = None
+        hazards = r.get("Hazards") or r.get("Hazard")
         if isinstance(hazards, list) and hazards:
             hazard = hazards[0].get("Name")
         elif isinstance(hazards, str):
@@ -44,36 +24,24 @@ def _parse(records: List[Dict]) -> List[Dict]:
             prods = r.get("Products")
             if isinstance(prods, list) and prods:
                 product = prods[0].get("Name")
-        parsed.append(
-            {
-                "source": "CPSC",
-                "id": r.get("RecallID"),
-                "title": r.get("Title"),
-                "product": product,
-                "hazard": hazard,
-                "recall_date": r.get("RecallDate"),
-                "url": r.get("URL"),
-            }
-        )
+        parsed.append({
+            "source": "cpsc",
+            "id": r.get("RecallID"),
+            "product": product,
+            "hazard": hazard,
+            "recall_date": r.get("RecallDate"),
+            "url": r.get("URL"),
+        })
     return parsed
 
 
 def fetch() -> List[Dict]:
-    """Return a list of recalls from the CPSC API or sample data."""
     try:
         response = requests.get(API_URL, timeout=10)
         response.raise_for_status()
-        payload = response.json()
-        records = (
-            payload.get("results")
-            or payload.get("Results")
-            or payload.get("recalls")
-            or payload
-        )
+        records = response.json()
         if isinstance(records, dict):
-            records = records.get("Recalls") or []
-        if not isinstance(records, list):
-            records = []
+            records = records.get("results") or records.get("Recalls") or []
         return _parse(records)
     except Exception:
         if not DATA_FILE.exists():
@@ -81,32 +49,3 @@ def fetch() -> List[Dict]:
         with DATA_FILE.open("r", encoding="utf-8") as fh:
             records = json.load(fh)
         return _parse(records)
-
-"""Fetch recalls from the CPSC API."""
-
-from typing import List, Dict
-import json
-
-
-DATA_FILE = Path(__file__).resolve().parents[3] / "data" / "cpsc_sample.json"
-
-
-def fetch() -> List[Dict]:
-    """Return a list of recalls from the CPSC sample data."""
-    if not DATA_FILE.exists():
-        return []
-    with DATA_FILE.open("r", encoding="utf-8") as fh:
-        records = json.load(fh)
-    # Normalize keys to maintain a consistent shape across sources
-    return [
-        {
-            "source": "CPSC",
-            "id": r.get("RecallID"),
-            "title": r.get("Title"),
-            "product": r.get("Product"),
-            "url": r.get("URL"),
-        }
-        for r in records
-    ]
-
-

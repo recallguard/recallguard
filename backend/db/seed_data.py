@@ -8,6 +8,10 @@ def seed(db_path: Path) -> None:
     cur = conn.cursor()
     cur.execute("INSERT INTO users (email) VALUES (?)", ("user@example.com",))
     cur.execute("INSERT INTO products (name, user_id) VALUES (?, ?)", ("Widget", 1))
+    cur.execute(
+        "INSERT INTO recalls (product, hazard, recall_date, source) VALUES (?, ?, ?, ?)",
+        ("Widget", "Fire hazard", "2024-04-01", "cpsc"),
+    )
     conn.commit()
     conn.close()
 
