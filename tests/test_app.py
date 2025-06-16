@@ -1,7 +1,11 @@
 from backend.api.app import create_app, USER_ITEMS
+import backend.api.recalls as recall_mod
+import backend.api.app as app_mod
 
 
-def test_app_routes():
+def test_app_routes(monkeypatch):
+    monkeypatch.setattr(recall_mod, "fetch_all", lambda use_cache=True: [{"product": "Widget"}])
+    monkeypatch.setattr(app_mod, "fetch_all", recall_mod.fetch_all)
     app = create_app()
     client = app.test_client()
 

@@ -13,10 +13,20 @@ CREATE TABLE products (
 );
 
 CREATE TABLE recalls (
+<<<<<<< HEAD
     id INTEGER PRIMARY KEY,
     product TEXT NOT NULL,
     hazard TEXT,
     recall_date TEXT,
     source TEXT
+=======
+    id TEXT NOT NULL,
+    product TEXT NOT NULL,
+    hazard TEXT,
+    recall_date TEXT,
+    source TEXT NOT NULL,
+    fetched_at TEXT NOT NULL,
+    PRIMARY KEY (id, source)
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 );
 

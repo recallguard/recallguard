@@ -10,7 +10,10 @@ from .alerts import check_user_items, generate_summary
 from backend.db import init_db
 from backend.utils.config import get_db_path
 from backend.utils import db as db_utils
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 from backend.utils.auth import (
     create_access_token,
     hash_password,
@@ -19,8 +22,11 @@ from backend.utils.auth import (
 )
 from datetime import datetime
 import sqlite3
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 
 # simple in-memory store for user items
 USER_ITEMS = []
@@ -30,7 +36,10 @@ def create_app() -> Flask:
     app = Flask(__name__)
     db_path = Path(get_db_path())
     init_db(db_path)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     app.config["DB_PATH"] = db_path
 
     @app.post('/api/auth/signup')
@@ -69,7 +78,10 @@ def create_app() -> Flask:
             return jsonify({'error': 'invalid credentials'}), 401
         token = create_access_token({'user_id': row['id']})
         return jsonify({'token': token, 'user_id': row['id']})
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 
     @app.get('/recalls')
     def recalls_route():
@@ -91,9 +103,13 @@ def create_app() -> Flask:
         return jsonify({'alerts': summaries})
 
     @app.get('/api/recalls/recent')
+<<<<<<< HEAD
 
     @jwt_required
 
+=======
+    @jwt_required
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     def recent_recalls() -> tuple:
         conn = db_utils.connect(db_path)
         rows = conn.execute(
@@ -104,9 +120,13 @@ def create_app() -> Flask:
         return jsonify([dict(row) for row in rows])
 
     @app.get('/api/recalls/user/<int:user_id>')
+<<<<<<< HEAD
 
     @jwt_required
 
+=======
+    @jwt_required
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     def user_recalls(user_id: int) -> tuple:
         conn = db_utils.connect(db_path)
         rows = conn.execute(
@@ -118,7 +138,10 @@ def create_app() -> Flask:
         conn.close()
         return jsonify([dict(row) for row in rows])
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     @app.post('/api/recalls/refresh')
     @jwt_required
     def manual_refresh() -> tuple:
@@ -127,5 +150,8 @@ def create_app() -> Flask:
         summary = refresh_recalls(db_path)
         return jsonify(summary)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     return app
