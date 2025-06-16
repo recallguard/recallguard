@@ -9,7 +9,7 @@ from sqlalchemy import text
 from backend.api.recalls import fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda
 from backend.utils import db as db_utils
 from backend.utils.alerts import create_alerts_for_new_recalls
-from backend.tasks import send_alert
+from backend.tasks import send_alert, send_notifications
 
 
 def refresh_recalls() -> Dict[str, int]:
@@ -18,6 +18,7 @@ def refresh_recalls() -> Dict[str, int]:
     trans = conn.begin()
     new = 0
     updated = 0
+    new_recall_rows: List[Dict] = []
 
     recalls: List[Dict] = []
     for func in (fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda):
@@ -58,11 +59,19 @@ def refresh_recalls() -> Dict[str, int]:
                 },
             )
             new += 1
+            new_recall_rows.append(r)
     trans.commit()
     alert_ids = create_alerts_for_new_recalls(conn, recalls)
     if os.getenv('CELERY_BROKER_URL'):
         for aid in alert_ids:
             send_alert.delay(aid)
+        if new_recall_rows:
+            send_notifications.delay(new_recall_rows)
+    else:
+        for aid in alert_ids:
+            send_alert(aid)
+        if new_recall_rows:
+            send_notifications(new_recall_rows)
     alerts_created = len(alert_ids)
     total = conn.execute(text("SELECT COUNT(*) FROM recalls")).fetchone()[0]
     conn.close()

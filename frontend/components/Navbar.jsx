@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { HamburgerIcon, SunIcon, MoonIcon } from '@chakra-ui/icons';
 import { AuthContext } from './AuthContext.jsx';
+import AlertsModal from './AlertsModal.jsx';
 
 export default function Navbar() {
   const { token, logout } = useContext(AuthContext);
@@ -35,6 +36,7 @@ export default function Navbar() {
           </Button>
         </Link>
       )}
+      {token && <AlertsModal />}
       <IconButton
         aria-label="Toggle dark mode"
         icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}

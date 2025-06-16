@@ -1,5 +1,13 @@
 from sqlalchemy import (
-    MetaData, Table, Column, Integer, String, Text, ForeignKey, PrimaryKeyConstraint
+    MetaData,
+    Table,
+    Column,
+    Integer,
+    String,
+    Text,
+    ForeignKey,
+    PrimaryKeyConstraint,
+    text,
 )
 
 metadata = MetaData()
@@ -11,6 +19,7 @@ users = Table(
     Column("email", String, nullable=False, unique=True),
     Column("password_hash", String, nullable=False),
     Column("created_at", String, nullable=False),
+    Column("email_opt_in", Integer, nullable=False, server_default="0"),
 )
 
 products = Table(
@@ -43,4 +52,21 @@ alerts = Table(
     Column("sent_at", String),
     Column("read_at", String),
     Column("error", Text),
+)
+
+subscriptions = Table(
+    "subscriptions",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("recall_source", String, nullable=False),
+    Column("product_query", String, nullable=False),
+    Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)
+
+sent_notifications = Table(
+    "sent_notifications",
+    metadata,
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("recall_id", String, primary_key=True),
 )
