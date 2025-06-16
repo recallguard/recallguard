@@ -1,5 +1,7 @@
 """Database initialization helpers."""
 
+
+
 from backend.utils.session import get_engine
 from sqlalchemy import text
 from .models import metadata
@@ -12,6 +14,8 @@ def init_db() -> None:
     with get_engine().connect() as conn:
         if not conn.execute(text('SELECT COUNT(*) FROM users')).fetchone()[0]:
             seed()
+
+
 
 from __future__ import annotations
 
@@ -66,4 +70,5 @@ def init_db(db_path: Path) -> None:
 
         seed_data.seed(Path(db_path))
     conn.close()
+
 

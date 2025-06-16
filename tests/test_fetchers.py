@@ -29,8 +29,11 @@ def fake_get(url, params=None, timeout=10):
     return FakeResponse(data)
 
 def test_fetchers_insert(tmp_path, monkeypatch):
+
+
     db = tmp_path / 't.db'
     monkeypatch.setenv('DATABASE_URL', f'sqlite:///{db}')
+
     init_db()
     monkeypatch.setattr(requests, 'get', fake_get)
     refresh_recalls()

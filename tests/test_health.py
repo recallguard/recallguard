@@ -3,8 +3,11 @@ from backend.db import init_db
 
 
 def setup_app(tmp_path, monkeypatch):
+
+
     db = tmp_path / 'health.db'
     monkeypatch.setenv('DATABASE_URL', f'sqlite:///{db}')
+
     init_db()
     app = create_app()
     return app.test_client(), app

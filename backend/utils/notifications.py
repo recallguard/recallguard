@@ -5,7 +5,11 @@ from sqlalchemy import text
 from os import getenv
 import requests
 from backend.utils.session import SessionLocal
+
+from backend.db.models import sent_notifications, alerts
+
 from backend.db.models import subscriptions, sent_notifications, alerts
+
 
 
 def match_subscriptions(db, recall: dict) -> List[dict]:

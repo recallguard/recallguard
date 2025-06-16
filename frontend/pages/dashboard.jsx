@@ -1,4 +1,7 @@
 
+
+
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Table,
@@ -24,10 +27,12 @@ import {
 import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import ReactMarkdown from 'react-markdown';
-=======
+
+
 import { useEffect, useState } from 'react';
 import { SimpleGrid, Box, Text, Badge } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
+
 
 
 export default function Dashboard() {
@@ -52,6 +57,8 @@ export default function Dashboard() {
   }, []);
 
 
+
+
   const columns = useMemo(
     () => [
       { accessorKey: 'product', header: 'Product' },
@@ -65,6 +72,27 @@ export default function Dashboard() {
     ],
     []
   );
+
+
+  const table = useReactTable({
+    data: recalls,
+    columns,
+    state: { globalFilter: filter },
+    getFilteredRowModel: getFilteredRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const rowVirtualizer = useVirtualizer({
+    count: table.getRowModel().rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 35,
+    overscan: 10,
+  });
+
+  const openDrawer = (row) => {
+    setSelected(row.original);
+    onOpen();
+
 
   if (recalls === null) {
     return <div>Loading...</div>;
@@ -102,11 +130,14 @@ export default function Dashboard() {
     if (h.includes('chemical')) return 'yellow';
     return 'gray';
 
+
   };
 
   const rows = rowVirtualizer.getVirtualItems();
 
   return (
+
+
 
     <Box p={4}>
       <Input
@@ -189,6 +220,8 @@ export default function Dashboard() {
       </Drawer>
     </Box>
 
+
+
     <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4} p={4}>
       {recalls.map((r) => (
         <MotionBox
@@ -212,6 +245,7 @@ export default function Dashboard() {
         </MotionBox>
       ))}
     </SimpleGrid>
+
 
   );
 }

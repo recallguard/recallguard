@@ -4,7 +4,10 @@ import backend.api.app as app_mod
 
 
 def test_app_routes(tmp_path, monkeypatch):
+
+
     monkeypatch.setenv('DATABASE_URL', f'sqlite:///{tmp_path / "app.db"}')
+
     monkeypatch.setattr(recall_mod, "fetch_all", lambda use_cache=True: [{"product": "Widget"}])
     monkeypatch.setattr(app_mod, "fetch_all", recall_mod.fetch_all)
     app = create_app()

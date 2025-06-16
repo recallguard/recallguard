@@ -7,6 +7,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
     services:
       postgres:
         image: postgres:16
@@ -23,6 +28,27 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
+
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: ruff check .
+      - run: pytest --cov=backend --cov-report=xml -q
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-py-${{ matrix.python-version }}
+          path: coverage.xml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run lint --silent
+      - run: npm test --silent -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-js
+          path: frontend/coverage/lcov.info
+
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: ruff check .
@@ -33,6 +59,7 @@ jobs:
       - run: npm install
       - run: npm run lint --silent
       - run: npm test --silent
+
 
   deploy:
     needs: test

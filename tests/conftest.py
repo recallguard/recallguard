@@ -5,6 +5,17 @@ from sqlalchemy.orm import sessionmaker
 from backend.db.models import metadata
 import backend.utils.session as session_mod
 
+
+
+@pytest.fixture(autouse=True)
+def db_session(monkeypatch):
+    url = "sqlite:///:memory:"
+    engine = create_engine(
+        url, connect_args={"check_same_thread": False}, future=True
+    )
+    monkeypatch.setenv("DATABASE_URL", url)
+
+
 TEST_DB_URL = "sqlite:///:memory:"
 
 
@@ -17,6 +28,7 @@ def db_session(monkeypatch):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+
     original = engine.dispose
 
     def _dispose_and_mark(*args, **kwargs):

@@ -2,10 +2,14 @@ from __future__ import annotations
 
 
 from datetime import datetime
-=======
+
+
+from datetime import datetime
+
 from pathlib import Path
 from datetime import datetime
 import sqlite3
+
 
 
 from flask import Flask, jsonify, request
@@ -36,9 +40,14 @@ def create_app() -> Flask:
     configure_logging()
     init_db()
 
+
+    configure_logging()
+    init_db()
+
     db_path = Path(get_db_path())
     init_db(db_path)
     app.config["DB_PATH"] = db_path
+
 
 
     @app.post('/api/auth/signup')
@@ -80,8 +89,13 @@ def create_app() -> Flask:
         token = create_access_token({'user_id': mapping['id']})
         return jsonify({'token': token, 'user_id': mapping['id']})
 
+
+        token = create_access_token({'user_id': mapping['id']})
+        return jsonify({'token': token, 'user_id': mapping['id']})
+
         token = create_access_token({'user_id': row['id']})
         return jsonify({'token': token, 'user_id': row['id']})
+
 
 
     @app.get('/recalls')
@@ -126,7 +140,10 @@ def create_app() -> Flask:
         conn.close()
 
         return jsonify([dict(row._mapping) for row in rows])
-=======
+
+
+        return jsonify([dict(row._mapping) for row in rows])
+
         return jsonify([dict(row) for row in rows])
 
 
@@ -138,9 +155,14 @@ def create_app() -> Flask:
         summary = refresh_recalls()
         return jsonify(summary)
 
+    app.register_blueprint(ops_bp)
+    app.register_blueprint(notifications_bp)
+
+
 
     app.register_blueprint(ops_bp)
     app.register_blueprint(notifications_bp)
+
 
 
     return app
