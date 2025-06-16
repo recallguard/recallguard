@@ -1,6 +1,4 @@
-
 """Database initialization helpers."""
-
 from __future__ import annotations
 
 import sqlite3
@@ -32,13 +30,6 @@ def create_tables(conn: sqlite3.Connection) -> None:
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS recalls (
-<<<<<<< HEAD
-            id INTEGER PRIMARY KEY,
-            product TEXT NOT NULL,
-            hazard TEXT,
-            recall_date TEXT,
-            source TEXT
-=======
             id TEXT NOT NULL,
             product TEXT NOT NULL,
             hazard TEXT,
@@ -46,34 +37,18 @@ def create_tables(conn: sqlite3.Connection) -> None:
             source TEXT NOT NULL,
             fetched_at TEXT NOT NULL,
             PRIMARY KEY (id, source)
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
         )
         """
     )
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 def init_db(db_path: Path) -> None:
     """Create tables and seed data if the DB is empty."""
     first = not Path(db_path).exists()
     conn = sqlite3.connect(db_path)
-<<<<<<< HEAD
-
     create_tables(conn)
     if first:
-
-    if first:
-        schema_path = Path(__file__).with_name("schema.sql")
-        conn.executescript(schema_path.read_text())
-
-=======
-    create_tables(conn)
-    if first:
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
         from . import seed_data
 
         seed_data.seed(Path(db_path))
     conn.close()
-

@@ -19,10 +19,6 @@ def seed(db_path: Path) -> None:
     )
     cur.execute("INSERT INTO products (name, user_id) VALUES (?, ?)", ("Widget", 1))
     cur.execute(
-<<<<<<< HEAD
-        "INSERT INTO recalls (product, hazard, recall_date, source) VALUES (?, ?, ?, ?)",
-        ("Widget", "Fire hazard", "2024-04-01", "cpsc"),
-=======
         "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at)"
         " VALUES (?, ?, ?, ?, ?, ?)",
         (
@@ -33,8 +29,6 @@ def seed(db_path: Path) -> None:
             "cpsc",
             datetime.utcnow().isoformat(),
         ),
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     )
     conn.commit()
     conn.close()
-

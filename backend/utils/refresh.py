@@ -3,12 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, List
-
-<<<<<<< HEAD
-=======
 from datetime import datetime
 
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 from backend.api.recalls import fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda
 from backend.utils import db as db_utils
 from backend.utils.config import get_db_path
@@ -33,10 +29,6 @@ def refresh_recalls(db_path: Path | None = None) -> Dict[str, int]:
         ).fetchone()
         if existing:
             conn.execute(
-<<<<<<< HEAD
-                "UPDATE recalls SET product=?, hazard=?, recall_date=? WHERE id=? AND source=?",
-                (r.get("product"), r.get("hazard"), r.get("recall_date"), r.get("id"), r.get("source")),
-=======
                 "UPDATE recalls SET product=?, hazard=?, recall_date=?, fetched_at=? "
                 "WHERE id=? AND source=?",
                 (
@@ -47,15 +39,10 @@ def refresh_recalls(db_path: Path | None = None) -> Dict[str, int]:
                     r.get("id"),
                     r.get("source"),
                 ),
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
             )
             updated += 1
         else:
             conn.execute(
-<<<<<<< HEAD
-                "INSERT INTO recalls (id, product, hazard, recall_date, source) VALUES (?, ?, ?, ?, ?)",
-                (r.get("id"), r.get("product"), r.get("hazard"), r.get("recall_date"), r.get("source")),
-=======
                 "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) "
                 "VALUES (?, ?, ?, ?, ?, ?)",
                 (
@@ -66,7 +53,6 @@ def refresh_recalls(db_path: Path | None = None) -> Dict[str, int]:
                     r.get("source"),
                     datetime.utcnow().isoformat(),
                 ),
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
             )
             new += 1
     conn.commit()

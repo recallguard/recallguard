@@ -1,8 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-<<<<<<< HEAD
-import Dashboard from '../pages/dashboard.jsx';
-=======
 import React from 'react';
 jest.mock('@chakra-ui/react', () => {
   const React = require('react');
@@ -23,7 +20,6 @@ jest.mock('@chakra-ui/icons', () => ({ SunIcon: () => <span>sun</span>, MoonIcon
 import Dashboard from '../pages/dashboard.jsx';
 import { ChakraProvider } from '@chakra-ui/react';
 import { AuthProvider } from '../components/AuthContext.jsx';
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 
 beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue({
@@ -33,11 +29,6 @@ beforeEach(() => {
   });
 });
 
-<<<<<<< HEAD
-test('renders recall table', async () => {
-  render(<Dashboard />);
-  expect(await screen.findByText('Widget')).toBeInTheDocument();
-=======
 test('renders recall cards with hazard badge', async () => {
   render(
     <ChakraProvider>
@@ -48,5 +39,4 @@ test('renders recall cards with hazard badge', async () => {
   );
   expect(await screen.findByText('Widget')).toBeInTheDocument();
   expect(screen.getByText('Fire hazard')).toBeInTheDocument();
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 });
