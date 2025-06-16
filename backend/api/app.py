@@ -5,6 +5,7 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 
 from .recalls import fetch_all
+from backend.utils.refresh import refresh_recalls
 from .alerts import check_user_items, generate_summary
 from backend.db import init_db
 from backend.utils.config import get_db_path
@@ -18,6 +19,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     db_path = Path(get_db_path())
     init_db(db_path)
+    app.config["DB_PATH"] = db_path
 
     @app.get('/recalls')
     def recalls_route():
@@ -59,5 +61,12 @@ def create_app() -> Flask:
         ).fetchall()
         conn.close()
         return jsonify([dict(row) for row in rows])
+
+    @app.post('/api/recalls/refresh')
+    def manual_refresh() -> tuple:
+        if request.headers.get('X-Admin') != 'true':
+            return jsonify({'error': 'unauthorized'}), 403
+        summary = refresh_recalls(db_path)
+        return jsonify(summary)
 
     return app

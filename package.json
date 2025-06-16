@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "lint": "echo lint passed",
-    "test": "jest"
+    "test": "jest",
+    "dev": "concurrently \"wait-on http://localhost:5000/api/recalls/recent\" \"next dev frontend\""
   },
   "dependencies": {
     "jest-environment-jsdom": "^30.0.0",
@@ -19,9 +20,11 @@
     "@testing-library/jest-dom": "^6.1.2",
     "@testing-library/react": "^14.1.2",
     "babel-jest": "^30.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^9.29.0",
     "eslint-plugin-react": "^7.37.5",
     "jest": "^30.0.0",
-    "jest-environment-jsdom": "^30.0.0"
+    "jest-environment-jsdom": "^30.0.0",
+    "wait-on": "^8.0.3"
   }
 }
