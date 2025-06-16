@@ -1,4 +1,8 @@
+
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
+=======
+import { ChakraProvider } from '@chakra-ui/react';
+
 import { AuthProvider } from '../components/AuthContext.jsx';
 import theme from '../theme.tsx';
 import '../styles/global.css';

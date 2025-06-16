@@ -4,8 +4,10 @@ from __future__ import annotations
 from typing import Dict, List
 from datetime import datetime
 
+
 import os
 from sqlalchemy import text
+
 from backend.api.recalls import fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda
 from backend.utils import db as db_utils
 from backend.utils.alerts import create_alerts_for_new_recalls
@@ -31,6 +33,7 @@ def refresh_recalls() -> Dict[str, int]:
         ).fetchone()
         if existing:
             conn.execute(
+
                 text(
                     "UPDATE recalls SET product=:product, hazard=:hazard, recall_date=:date, fetched_at=:f WHERE id=:id AND source=:source"
                 ),
@@ -42,10 +45,23 @@ def refresh_recalls() -> Dict[str, int]:
                     "id": r.get("id"),
                     "source": r.get("source"),
                 },
+
+                "UPDATE recalls SET product=?, hazard=?, recall_date=?, fetched_at=? "
+                "WHERE id=? AND source=?",
+                (
+                    r.get("product"),
+                    r.get("hazard"),
+                    r.get("recall_date"),
+                    datetime.utcnow().isoformat(),
+                    r.get("id"),
+                    r.get("source"),
+                ),
+
             )
             updated += 1
         else:
             conn.execute(
+
                 text(
                     "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) VALUES (:id, :product, :hazard, :date, :source, :f)"
                 ),
@@ -57,6 +73,18 @@ def refresh_recalls() -> Dict[str, int]:
                     "source": r.get("source"),
                     "f": datetime.utcnow().isoformat(),
                 },
+
+                "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    r.get("id"),
+                    r.get("product"),
+                    r.get("hazard"),
+                    r.get("recall_date"),
+                    r.get("source"),
+                    datetime.utcnow().isoformat(),
+                ),
+
             )
             new += 1
             new_recall_rows.append(r)

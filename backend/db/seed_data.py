@@ -5,6 +5,7 @@ from backend.utils.auth import hash_password
 from backend.utils.session import get_engine
 
 
+
 def seed() -> None:
     with get_engine().begin() as conn:
         conn.execute(
@@ -35,3 +36,31 @@ def seed() -> None:
                 "INSERT INTO subscriptions (user_id, recall_source, product_query) VALUES (1, 'cpsc', 'Widget')"
             )
         )
+
+def seed(db_path: Path) -> None:
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
+        (
+            "user@example.com",
+            hash_password("password"),
+            datetime.utcnow().isoformat(),
+        ),
+    )
+    cur.execute("INSERT INTO products (name, user_id) VALUES (?, ?)", ("Widget", 1))
+    cur.execute(
+        "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at)"
+        " VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            "demo-1",
+            "Widget",
+            "Fire hazard",
+            "2024-04-01",
+            "cpsc",
+            datetime.utcnow().isoformat(),
+        ),
+    )
+    conn.commit()
+    conn.close()
+

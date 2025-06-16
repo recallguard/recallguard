@@ -47,7 +47,11 @@ beforeEach(() => {
   });
 });
 
+
 test('renders table rows after fetch', async () => {
+=======
+test('renders recall cards with hazard badge', async () => {
+
   render(
     <ChakraProvider>
       <AuthProvider>

@@ -5,9 +5,13 @@
   "scripts": {
     "lint": "echo lint passed",
     "test": "jest",
+
     "dev": "concurrently \"wait-on http://localhost:5000/api/recalls/recent\" \"next dev frontend\"",
     "analyze": "next build frontend && next-bundle-analyzer",
     "lhci": "lhci autorun"
+=======
+    "dev": "concurrently \"wait-on http://localhost:5000/api/recalls/recent\" \"next dev frontend\""
+
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",

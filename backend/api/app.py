@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+
 from datetime import datetime
+=======
+from pathlib import Path
+from datetime import datetime
+import sqlite3
+
 
 from flask import Flask, jsonify, request
 from sqlalchemy import text
@@ -26,8 +32,14 @@ USER_ITEMS: list[str] = []
 
 def create_app() -> Flask:
     app = Flask(__name__)
+
     configure_logging()
     init_db()
+
+    db_path = Path(get_db_path())
+    init_db(db_path)
+    app.config["DB_PATH"] = db_path
+
 
     @app.post('/api/auth/signup')
     def signup() -> tuple:
@@ -64,8 +76,13 @@ def create_app() -> Flask:
         mapping = row._mapping if row is not None else None
         if not mapping or not verify_password(password, mapping['password_hash']):
             return jsonify({'error': 'invalid credentials'}), 401
+
         token = create_access_token({'user_id': mapping['id']})
         return jsonify({'token': token, 'user_id': mapping['id']})
+
+        token = create_access_token({'user_id': row['id']})
+        return jsonify({'token': token, 'user_id': row['id']})
+
 
     @app.get('/recalls')
     def recalls_route():
@@ -107,7 +124,11 @@ def create_app() -> Flask:
             {'u': user_id},
         ).fetchall()
         conn.close()
+
         return jsonify([dict(row._mapping) for row in rows])
+=======
+        return jsonify([dict(row) for row in rows])
+
 
     @app.post('/api/recalls/refresh')
     @jwt_required
@@ -117,7 +138,9 @@ def create_app() -> Flask:
         summary = refresh_recalls()
         return jsonify(summary)
 
+
     app.register_blueprint(ops_bp)
     app.register_blueprint(notifications_bp)
+
 
     return app
