@@ -55,3 +55,8 @@ def jwt_required(fn):
         return fn(*args, **kwargs)
 
     return wrapper
+
+
+def get_jwt_subject() -> dict:
+    """Return the decoded JWT payload set by ``jwt_required``."""
+    return getattr(request, 'user', {})

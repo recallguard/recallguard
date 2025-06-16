@@ -1,5 +1,7 @@
 # RecallGuard
 
+[![CI](https://github.com/recallguard/recallguard/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/recallguard/recallguard/actions/workflows/ci-cd.yml)
+
 
 
 
@@ -18,10 +20,26 @@ contains a minimal prototype skeleton.
 ## Setup
 Install dependencies with `pip install -r requirements.txt`.
 
-Run tests with `pytest`.
-
+Run tests with `pytest`. The suite uses an in-memory SQLite database so no
+external service is required. In CI a Postgres service is started
+automatically.
 
 Sample recall data used for tests is located under `tests/data`.
+
+### Running locally with Postgres
+Start a database via Docker and run migrations:
+
+```bash
+docker compose up -d db
+make db-up
+```
+
+To process alert notifications, also start Redis and a Celery worker:
+
+```bash
+docker compose up -d redis
+celery -A backend.tasks worker
+```
 
 ## Auth & running locally
 Set a JWT secret and recreate the dev database:
@@ -131,4 +149,22 @@ e
 
 Sample recall data used for tests is located under `tests/data`.
 
+
+
+## Local development via Docker
+Run all services with:
+```bash
+docker compose up --build
+```
+The API will be available at http://localhost:5000 and the dashboard at http://localhost:3000.
+
+## Notifications & Alerts
+Set `SENDGRID_API_KEY`, `ALERTS_FROM_EMAIL`, and `SLACK_WEBHOOK_URL` in your environment to enable e-mails and Slack messages when new recalls match user subscriptions. Users can opt in to e-mail notifications from the dashboard.
+
+
+## Deployment
+The project ships with a GitHub Actions workflow that builds Docker images and deploys to Fly.io and Vercel whenever `main` passes all tests. Set the following repository secrets:
+- `FLY_API_TOKEN`
+- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+- `PG_URL`, `JWT_SECRET`, `SENDGRID_API_KEY`, `SLACK_WEBHOOK_URL`
 

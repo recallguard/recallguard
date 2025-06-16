@@ -2,15 +2,14 @@ from backend.api.app import create_app
 from backend.db import init_db
 
 
-def setup_db(tmp_path):
+def setup_db(tmp_path, monkeypatch):
     db = tmp_path / 'rg.db'
-    init_db(db)
-    return db
+    monkeypatch.setenv('DATABASE_URL', f'sqlite:///{db}')
+    init_db()
 
 
 def test_recent_and_user_endpoints(tmp_path, monkeypatch):
-    db = setup_db(tmp_path)
-    monkeypatch.setenv('RECALLGUARD_DB', str(db))
+    setup_db(tmp_path, monkeypatch)
     app = create_app()
     client = app.test_client()
 
