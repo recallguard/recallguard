@@ -24,6 +24,7 @@ Run tests with `pytest`.
 Sample CPSC recall data is provided in `data/cpsc_sample.json` for local
 development without external API access.
 
+
 ## Auth & running locally
 Set a JWT secret and recreate the dev database:
 
@@ -54,19 +55,29 @@ Trigger a manual refresh:
 curl -X POST -H "X-Admin: true" localhost:5000/api/recalls/refresh
 ```
 
+
+
 ## Running the dashboard
 1. Install Python and Node dependencies:
    ```bash
    pip install -r requirements.txt
    npm install
    ```
+e
 2. Start the Flask API and scheduler:
+
+2. Start the Flask API:
+
    ```bash
    python run.py
    ```
 3. In another terminal, run the React/Next dashboard:
    ```bash
+
    npm run dev
+=======
+   npx next dev frontend
+
    ```
 
 
