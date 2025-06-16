@@ -68,7 +68,8 @@ curl -X POST -H "X-Admin: true" localhost:5000/api/recalls/refresh
    npm run dev
    ```
 
-   Dark mode is available using the toggle in the navbar.
+   Dark mode is available using the toggle in the navbar. The responsive card
+   grid is built with Chakra UI and styled with Tailwind accents.
 
 
 ## Auth & running locally
