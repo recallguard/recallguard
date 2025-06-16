@@ -30,7 +30,9 @@ Set a JWT secret and recreate the dev database:
 
 ```bash
 export JWT_SECRET=change-me
-python -m backend.db      # creates dev.db with demo user
+1. Install Python and Node dependencies (Chakra UI will be installed via npm):
+   Dark mode is available using the toggle in the navbar.
+
 python run.py             # start API + scheduler
 ```
 
