@@ -20,7 +20,9 @@ contains a minimal prototype skeleton.
 ## Setup
 Install dependencies with `pip install -r requirements.txt`.
 
-Run tests with `pytest`.
+Run tests with `pytest`. The suite uses an in-memory SQLite database so no
+external service is required. In CI a Postgres service is started
+automatically.
 
 Sample recall data used for tests is located under `tests/data`.
 

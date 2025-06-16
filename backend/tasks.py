@@ -58,12 +58,21 @@ def send_alert(alert_id: int) -> None:
 @celery.task
 def send_notifications(new_recalls: list[dict]) -> int:
     sent = 0
-    with SessionLocal() as db:
+    db = SessionLocal()
+    try:
         for recall in new_recalls:
             sent += queue_notifications(db, recall)
             if SLACK_URL:
                 try:
-                    requests.post(SLACK_URL, json={"text": f"\ud83d\udea8 *{recall['source'].upper()}* recall: *{recall['product']}* <{recall.get('url','')}|Read more>"})
+                    requests.post(
+                        SLACK_URL,
+                        json={
+                            "text": f"\ud83d\udea8 *{recall['source'].upper()}* recall: *{recall['product']}* <{recall.get('url','')}|Read more>"
+                        },
+                    )
                 except Exception:
                     pass
+    finally:
+        db.close()
+        SessionLocal.remove()
     return sent

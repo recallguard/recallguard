@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List
 from sqlalchemy import text
 from os import getenv
+import requests
 from backend.utils.session import SessionLocal
 from backend.db.models import subscriptions, sent_notifications, alerts
 
@@ -36,6 +37,17 @@ def queue_notifications(db, recall: dict) -> int:
                 alerts.insert().values(user_id=m["user_id"], recall_id=recall.get("id"), channel="email")
             )
             session.commit()
+            slack = getenv("SLACK_WEBHOOK_URL")
+            if slack:
+                try:
+                    requests.post(
+                        slack,
+                        json={
+                            "text": f"\ud83d\udea8 *{recall['source'].upper()}* recall: *{recall['product']}* <{recall.get('url','')}|Read more>"
+                        },
+                    )
+                except Exception:
+                    pass
             if getenv("CELERY_BROKER_URL"):
                 from backend.tasks import send_alert
                 send_alert.delay(res.lastrowid)
