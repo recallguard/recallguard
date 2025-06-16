@@ -1,40 +1,32 @@
 """Seed database with example data."""
-import sqlite3
-from pathlib import Path
 from datetime import datetime
-
+from sqlalchemy import text
 from backend.utils.auth import hash_password
+from backend.utils.session import get_engine
 
 
-def seed(db_path: Path) -> None:
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
-        (
-            "user@example.com",
-            hash_password("password"),
-            datetime.utcnow().isoformat(),
-        ),
-    )
-    cur.execute("INSERT INTO products (name, user_id) VALUES (?, ?)", ("Widget", 1))
-    cur.execute(
-<<<<<<< HEAD
-        "INSERT INTO recalls (product, hazard, recall_date, source) VALUES (?, ?, ?, ?)",
-        ("Widget", "Fire hazard", "2024-04-01", "cpsc"),
-=======
-        "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at)"
-        " VALUES (?, ?, ?, ?, ?, ?)",
-        (
-            "demo-1",
-            "Widget",
-            "Fire hazard",
-            "2024-04-01",
-            "cpsc",
-            datetime.utcnow().isoformat(),
-        ),
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
-    )
-    conn.commit()
-    conn.close()
-
+def seed() -> None:
+    with get_engine().begin() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO users (email, password_hash, created_at) VALUES (:e, :p, :c)"
+            ),
+            {"e": "user@example.com", "p": hash_password("password"), "c": datetime.utcnow().isoformat()},
+        )
+        conn.execute(
+            text("INSERT INTO products (name, user_id) VALUES (:n, :u)"),
+            {"n": "Widget", "u": 1},
+        )
+        conn.execute(
+            text(
+                "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) VALUES (:i, :p, :h, :d, :s, :f)"
+            ),
+            {
+                "i": "demo-1",
+                "p": "Widget",
+                "h": "Fire hazard",
+                "d": "2024-04-01",
+                "s": "cpsc",
+                "f": datetime.utcnow().isoformat(),
+            },
+        )

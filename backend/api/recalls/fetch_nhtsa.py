@@ -1,4 +1,3 @@
-"""Fetch recalls from the NHTSA API."""
 from __future__ import annotations
 
 from typing import Dict, List
@@ -8,13 +7,6 @@ import requests
 API_URL = "https://api.nhtsa.gov/Recalls/vehicle"
 
 
-<<<<<<< HEAD
-def fetch(use_cache: bool = True) -> List[Dict]:
-    """Return vehicle-related recalls.
-    This placeholder would normally call the NHTSA API.
-    """
-    return [{"source": "NHTSA", "title": "Vehicle recall", "product": "Car"}]
-=======
 def _request(params: Dict) -> Dict:
     for attempt in range(3):
         try:
@@ -58,5 +50,3 @@ def fetch(use_cache: bool = False) -> List[Dict]:
             break
         page += 1
     return results
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
-

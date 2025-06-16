@@ -1,25 +1,21 @@
 """Data refresh utilities."""
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict, List
-
-<<<<<<< HEAD
-=======
 from datetime import datetime
 
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
+import os
+from sqlalchemy import text
 from backend.api.recalls import fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda
 from backend.utils import db as db_utils
-from backend.utils.config import get_db_path
+from backend.utils.alerts import create_alerts_for_new_recalls
+from backend.tasks import send_alert
 
 
-def refresh_recalls(db_path: Path | None = None) -> Dict[str, int]:
+def refresh_recalls() -> Dict[str, int]:
     """Fetch latest recalls and upsert into the database."""
-    if db_path is None:
-        db_path = Path(get_db_path())
-
-    conn = db_utils.connect(db_path)
+    conn = db_utils.connect()
+    trans = conn.begin()
     new = 0
     updated = 0
 
@@ -29,50 +25,48 @@ def refresh_recalls(db_path: Path | None = None) -> Dict[str, int]:
 
     for r in recalls:
         existing = conn.execute(
-            "SELECT id FROM recalls WHERE id=? AND source=?", (r.get("id"), r.get("source"))
+            text("SELECT id FROM recalls WHERE id=:id AND source=:source"),
+            {"id": r.get("id"), "source": r.get("source")},
         ).fetchone()
         if existing:
             conn.execute(
-<<<<<<< HEAD
-                "UPDATE recalls SET product=?, hazard=?, recall_date=? WHERE id=? AND source=?",
-                (r.get("product"), r.get("hazard"), r.get("recall_date"), r.get("id"), r.get("source")),
-=======
-                "UPDATE recalls SET product=?, hazard=?, recall_date=?, fetched_at=? "
-                "WHERE id=? AND source=?",
-                (
-                    r.get("product"),
-                    r.get("hazard"),
-                    r.get("recall_date"),
-                    datetime.utcnow().isoformat(),
-                    r.get("id"),
-                    r.get("source"),
+                text(
+                    "UPDATE recalls SET product=:product, hazard=:hazard, recall_date=:date, fetched_at=:f WHERE id=:id AND source=:source"
                 ),
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
+                {
+                    "product": r.get("product"),
+                    "hazard": r.get("hazard"),
+                    "date": r.get("recall_date"),
+                    "f": datetime.utcnow().isoformat(),
+                    "id": r.get("id"),
+                    "source": r.get("source"),
+                },
             )
             updated += 1
         else:
             conn.execute(
-<<<<<<< HEAD
-                "INSERT INTO recalls (id, product, hazard, recall_date, source) VALUES (?, ?, ?, ?, ?)",
-                (r.get("id"), r.get("product"), r.get("hazard"), r.get("recall_date"), r.get("source")),
-=======
-                "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (
-                    r.get("id"),
-                    r.get("product"),
-                    r.get("hazard"),
-                    r.get("recall_date"),
-                    r.get("source"),
-                    datetime.utcnow().isoformat(),
+                text(
+                    "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) VALUES (:id, :product, :hazard, :date, :source, :f)"
                 ),
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
+                {
+                    "id": r.get("id"),
+                    "product": r.get("product"),
+                    "hazard": r.get("hazard"),
+                    "date": r.get("recall_date"),
+                    "source": r.get("source"),
+                    "f": datetime.utcnow().isoformat(),
+                },
             )
             new += 1
-    conn.commit()
-    total = conn.execute("SELECT COUNT(*) FROM recalls").fetchone()[0]
+    trans.commit()
+    alert_ids = create_alerts_for_new_recalls(conn, recalls)
+    if os.getenv('CELERY_BROKER_URL'):
+        for aid in alert_ids:
+            send_alert.delay(aid)
+    alerts_created = len(alert_ids)
+    total = conn.execute(text("SELECT COUNT(*) FROM recalls")).fetchone()[0]
     conn.close()
 
-    summary = {"new": new, "updated": updated, "total": total}
+    summary = {"new": new, "updated": updated, "total": total, "alerts": alerts_created}
     print(summary)
     return summary

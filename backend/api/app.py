@@ -1,46 +1,33 @@
 from __future__ import annotations
 
-from pathlib import Path
+from datetime import datetime
 
 from flask import Flask, jsonify, request
+from sqlalchemy import text
+from .ops import bp as ops_bp
+from .notifications import bp as notifications_bp
+from backend.utils.logging import configure_logging
 
 from .recalls import fetch_all
 from backend.utils.refresh import refresh_recalls
 from .alerts import check_user_items, generate_summary
 from backend.db import init_db
-from backend.utils.config import get_db_path
 from backend.utils import db as db_utils
-<<<<<<< HEAD
-
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 from backend.utils.auth import (
     create_access_token,
     hash_password,
     verify_password,
     jwt_required,
 )
-from datetime import datetime
-import sqlite3
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 
 # simple in-memory store for user items
-USER_ITEMS = []
+USER_ITEMS: list[str] = []
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    db_path = Path(get_db_path())
-    init_db(db_path)
-<<<<<<< HEAD
-
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
-    app.config["DB_PATH"] = db_path
+    configure_logging()
+    init_db()
 
     @app.post('/api/auth/signup')
     def signup() -> tuple:
@@ -49,14 +36,14 @@ def create_app() -> Flask:
         password = data.get('password')
         if not email or not password:
             return jsonify({'error': 'invalid'}), 400
-        conn = db_utils.connect(db_path)
+        conn = db_utils.connect()
         try:
             cur = conn.execute(
-                'INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)',
-                (email, hash_password(password), datetime.utcnow().isoformat()),
+                text('INSERT INTO users (email, password_hash, created_at) VALUES (:e, :p, :c)'),
+                {'e': email, 'p': hash_password(password), 'c': datetime.utcnow().isoformat()},
             )
             conn.commit()
-        except sqlite3.IntegrityError:
+        except Exception:
             conn.close()
             return jsonify({'error': 'email exists'}), 400
         user_id = cur.lastrowid
@@ -69,19 +56,16 @@ def create_app() -> Flask:
         data = request.get_json(force=True)
         email = data.get('email')
         password = data.get('password')
-        conn = db_utils.connect(db_path)
+        conn = db_utils.connect()
         row = conn.execute(
-            'SELECT id, password_hash FROM users WHERE email=?', (email,)
+            text('SELECT id, password_hash FROM users WHERE email=:e'), {'e': email}
         ).fetchone()
         conn.close()
-        if not row or not verify_password(password, row['password_hash']):
+        mapping = row._mapping if row is not None else None
+        if not mapping or not verify_password(password, mapping['password_hash']):
             return jsonify({'error': 'invalid credentials'}), 401
-        token = create_access_token({'user_id': row['id']})
-        return jsonify({'token': token, 'user_id': row['id']})
-<<<<<<< HEAD
-
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
+        token = create_access_token({'user_id': mapping['id']})
+        return jsonify({'token': token, 'user_id': mapping['id']})
 
     @app.get('/recalls')
     def recalls_route():
@@ -103,55 +87,37 @@ def create_app() -> Flask:
         return jsonify({'alerts': summaries})
 
     @app.get('/api/recalls/recent')
-<<<<<<< HEAD
-
     @jwt_required
-
-=======
-    @jwt_required
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     def recent_recalls() -> tuple:
-        conn = db_utils.connect(db_path)
+        conn = db_utils.connect()
         rows = conn.execute(
-            'SELECT id, product, hazard, recall_date, source '
-            'FROM recalls ORDER BY recall_date DESC LIMIT 25'
+            text('SELECT id, product, hazard, recall_date, source FROM recalls ORDER BY recall_date DESC LIMIT 25')
         ).fetchall()
         conn.close()
-        return jsonify([dict(row) for row in rows])
+        return jsonify([dict(row._mapping) for row in rows])
 
     @app.get('/api/recalls/user/<int:user_id>')
-<<<<<<< HEAD
-
     @jwt_required
-
-=======
-    @jwt_required
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     def user_recalls(user_id: int) -> tuple:
-        conn = db_utils.connect(db_path)
+        conn = db_utils.connect()
         rows = conn.execute(
-            'SELECT r.id, r.product, r.hazard, r.recall_date, r.source '
-            'FROM recalls r JOIN products p ON lower(r.product)=lower(p.name) '
-            'WHERE p.user_id=? ORDER BY r.recall_date DESC',
-            (user_id,),
+            text('SELECT r.id, r.product, r.hazard, r.recall_date, r.source '
+                 'FROM recalls r JOIN products p ON lower(r.product)=lower(p.name) '
+                 'WHERE p.user_id=:u ORDER BY r.recall_date DESC'),
+            {'u': user_id},
         ).fetchall()
         conn.close()
-        return jsonify([dict(row) for row in rows])
+        return jsonify([dict(row._mapping) for row in rows])
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     @app.post('/api/recalls/refresh')
     @jwt_required
     def manual_refresh() -> tuple:
         if request.headers.get('X-Admin') != 'true':
             return jsonify({'error': 'unauthorized'}), 403
-        summary = refresh_recalls(db_path)
+        summary = refresh_recalls()
         return jsonify(summary)
 
-<<<<<<< HEAD
+    app.register_blueprint(ops_bp)
+    app.register_blueprint(notifications_bp)
 
-=======
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
     return app

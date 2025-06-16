@@ -1,29 +1,43 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-<<<<<<< HEAD
-import Dashboard from '../pages/dashboard.jsx';
-=======
 import React from 'react';
 jest.mock('@chakra-ui/react', () => {
   const React = require('react');
   return {
     ChakraProvider: ({ children }) => <div>{children}</div>,
-    SimpleGrid: ({ children }) => <div>{children}</div>,
     Box: ({ children }) => <div>{children}</div>,
-    Text: ({ children }) => <span>{children}</span>,
+    Table: ({ children }) => <table>{children}</table>,
+    Thead: ({ children }) => <thead>{children}</thead>,
+    Tbody: ({ children }) => <tbody>{children}</tbody>,
+    Tr: ({ children, ...props }) => <tr {...props}>{children}</tr>,
+    Th: ({ children }) => <th>{children}</th>,
+    Td: ({ children }) => <td>{children}</td>,
     Badge: ({ children }) => <span>{children}</span>,
+    Input: (props) => <input {...props} />,
+    Drawer: ({ children }) => <div>{children}</div>,
+    DrawerOverlay: ({ children }) => <div>{children}</div>,
+    DrawerContent: ({ children }) => <div>{children}</div>,
+    DrawerHeader: ({ children }) => <div>{children}</div>,
+    DrawerBody: ({ children }) => <div>{children}</div>,
+    Skeleton: () => <div>loading</div>,
+    Center: ({ children }) => <div>{children}</div>,
+    HStack: ({ children }) => <div>{children}</div>,
     Flex: ({ children }) => <div>{children}</div>,
+    Spacer: () => <div />,
+    IconButton: (props) => <button {...props} />,
     Button: ({ children, ...props }) => <button {...props}>{children}</button>,
-    IconButton: ({ children, ...props }) => <button {...props}>{children}</button>,
-    useColorMode: () => ({ colorMode: 'light', toggleColorMode: () => {} })
+    useDisclosure: () => ({ isOpen: false, onOpen: jest.fn(), onClose: jest.fn() }),
+    useColorMode: () => ({ colorMode: 'light', toggleColorMode: () => {} }),
+    Link: (props) => <a {...props} />,
   };
 });
 jest.mock('@chakra-ui/icons', () => ({ SunIcon: () => <span>sun</span>, MoonIcon: () => <span>moon</span> }));
+jest.mock('@tanstack/react-virtual', () => ({ useVirtualizer: () => ({ getVirtualItems: () => [{ index: 0 }] }) }));
+jest.mock('react-markdown', () => (props) => <div>{props.children}</div>);
 
 import Dashboard from '../pages/dashboard.jsx';
 import { ChakraProvider } from '@chakra-ui/react';
 import { AuthProvider } from '../components/AuthContext.jsx';
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 
 beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue({
@@ -33,12 +47,7 @@ beforeEach(() => {
   });
 });
 
-<<<<<<< HEAD
-test('renders recall table', async () => {
-  render(<Dashboard />);
-  expect(await screen.findByText('Widget')).toBeInTheDocument();
-=======
-test('renders recall cards with hazard badge', async () => {
+test('renders table rows after fetch', async () => {
   render(
     <ChakraProvider>
       <AuthProvider>
@@ -48,5 +57,5 @@ test('renders recall cards with hazard badge', async () => {
   );
   expect(await screen.findByText('Widget')).toBeInTheDocument();
   expect(screen.getByText('Fire hazard')).toBeInTheDocument();
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
 });
+

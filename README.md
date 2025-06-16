@@ -20,8 +20,22 @@ Install dependencies with `pip install -r requirements.txt`.
 
 Run tests with `pytest`.
 
-
 Sample recall data used for tests is located under `tests/data`.
+
+### Running locally with Postgres
+Start a database via Docker and run migrations:
+
+```bash
+docker compose up -d db
+make db-up
+```
+
+To process alert notifications, also start Redis and a Celery worker:
+
+```bash
+docker compose up -d redis
+celery -A backend.tasks worker
+```
 
 ## Auth & running locally
 Set a JWT secret and recreate the dev database:
