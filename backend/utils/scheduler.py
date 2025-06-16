@@ -1,15 +1,38 @@
-"""Simple task scheduler using schedule library."""
-import schedule
-import time
-from typing import Callable
+"""APScheduler integration for RecallGuard."""
+from __future__ import annotations
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+from flask import Flask
+
+from .refresh import refresh_recalls
+from .config import get_db_path
+from pathlib import Path
 
 
-def every_minute(func: Callable) -> None:
-    schedule.every(1).minutes.do(func)
+_scheduler: BackgroundScheduler | None = None
 
 
-def run_forever() -> None:
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+def init_scheduler(app: Flask) -> BackgroundScheduler:
+    """Initialize and start the APScheduler."""
+    global _scheduler
 
+    if _scheduler is not None:
+        return _scheduler
+
+    _scheduler = BackgroundScheduler(timezone="UTC")
+
+    def job() -> None:
+        db_path = Path(get_db_path())
+        refresh_recalls(db_path)
+
+    trigger = CronTrigger(hour=2, minute=30)
+    _scheduler.add_job(job, trigger, id="refresh_recalls", replace_existing=True)
+    _scheduler.start()
+
+    @app.teardown_appcontext
+    def shutdown(exception: Exception | None = None) -> None:
+        if _scheduler and _scheduler.running:
+            _scheduler.shutdown(wait=False)
+
+    return _scheduler

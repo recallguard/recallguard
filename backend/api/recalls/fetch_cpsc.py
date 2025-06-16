@@ -35,7 +35,11 @@ def _parse(records: List[Dict]) -> List[Dict]:
     return parsed
 
 
+
+def fetch(use_cache: bool = True) -> List[Dict]:
+=======
 def fetch() -> List[Dict]:
+
     try:
         response = requests.get(API_URL, timeout=10)
         response.raise_for_status()
@@ -44,7 +48,7 @@ def fetch() -> List[Dict]:
             records = records.get("results") or records.get("Recalls") or []
         return _parse(records)
     except Exception:
-        if not DATA_FILE.exists():
+        if not use_cache or not DATA_FILE.exists():
             return []
         with DATA_FILE.open("r", encoding="utf-8") as fh:
             records = json.load(fh)

@@ -28,7 +28,11 @@ def _parse(records: List[Dict]) -> List[Dict]:
     return parsed
 
 
+
+def fetch(use_cache: bool = True) -> List[Dict]:
+=======
 def fetch() -> List[Dict]:
+
     try:
         response = requests.get(API_URL, timeout=10)
         response.raise_for_status()
@@ -37,7 +41,7 @@ def fetch() -> List[Dict]:
         CACHE_FILE.write_text(json.dumps(data), encoding="utf-8")
         return parsed
     except Exception:
-        if CACHE_FILE.exists():
+        if use_cache and CACHE_FILE.exists():
             try:
                 data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
                 return _parse(data)
