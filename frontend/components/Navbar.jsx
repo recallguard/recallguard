@@ -1,51 +1,73 @@
 import Link from 'next/link';
 import { useContext } from 'react';
-<<<<<<< HEAD
-=======
-import { Flex, Button, IconButton, useColorMode } from '@chakra-ui/react';
-import { SunIcon, MoonIcon } from '@chakra-ui/icons';
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
+import {
+  Flex,
+  Button,
+  IconButton,
+  useColorMode,
+  HStack,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerHeader,
+  DrawerBody,
+  useDisclosure,
+  Spacer,
+} from '@chakra-ui/react';
+import { HamburgerIcon, SunIcon, MoonIcon } from '@chakra-ui/icons';
 import { AuthContext } from './AuthContext.jsx';
+import AlertsModal from './AlertsModal.jsx';
 
 export default function Navbar() {
   const { token, logout } = useContext(AuthContext);
-<<<<<<< HEAD
-  return (
-    <nav>
-      <Link href="/">Home</Link>{' '}
-      {token ? (
-        <button onClick={logout}>Logout</button>
-      ) : (
-        <Link href="/login">Login</Link>
-      )}
-    </nav>
-=======
   const { colorMode, toggleColorMode } = useColorMode();
-  return (
-    <Flex as="nav" p={4} mb={4} justify="space-between" align="center">
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const MenuLinks = (
+    <HStack spacing={4} align="center">
       <Link href="/">Home</Link>
-      <div>
-        <IconButton
-          mr={2}
-          aria-label="Toggle dark mode"
-          icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-          onClick={toggleColorMode}
-          _focusVisible={{ boxShadow: 'outline' }}
-        />
-        {token ? (
-          <Button onClick={logout} ml={2} aria-label="Logout" _focusVisible={{ boxShadow: 'outline' }}>
-            Logout
+      {token ? (
+        <Button onClick={logout} aria-label="Logout" _focusVisible={{ boxShadow: 'outline' }}>
+          Logout
+        </Button>
+      ) : (
+        <Link href="/login">
+          <Button aria-label="Login" _focusVisible={{ boxShadow: 'outline' }}>
+            Login
           </Button>
-        ) : (
-          <Link href="/login">
-            <Button ml={2} aria-label="Login" _focusVisible={{ boxShadow: 'outline' }}>
-              Login
-            </Button>
-          </Link>
-        )}
-      </div>
+        </Link>
+      )}
+      {token && <AlertsModal />}
+      <IconButton
+        aria-label="Toggle dark mode"
+        icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+        onClick={toggleColorMode}
+        _focusVisible={{ boxShadow: 'outline' }}
+      />
+    </HStack>
+  );
+
+  return (
+    <Flex as="header" position="sticky" top="0" zIndex="1000" px={4} py={2} boxShadow="sm" bg="chakra-body-bg">
+      <HStack w="full" align="center">
+        <IconButton
+          display={{ base: 'inline-flex', md: 'none' }}
+          aria-label="Open menu"
+          icon={<HamburgerIcon />}
+          onClick={onOpen}
+        />
+        <Link href="/">RecallGuard</Link>
+        <Spacer />
+        <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
+          {MenuLinks}
+        </HStack>
+      </HStack>
+      <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerHeader>Menu</DrawerHeader>
+          <DrawerBody>{MenuLinks}</DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Flex>
->>>>>>> 9ced1687 (Improve recall fetching and add pagination tests)
   );
 }
-

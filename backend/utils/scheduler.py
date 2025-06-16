@@ -6,8 +6,7 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask
 
 from .refresh import refresh_recalls
-from .config import get_db_path
-from pathlib import Path
+from backend.api.ops import SCHEDULER_JOBS
 
 
 _scheduler: BackgroundScheduler | None = None
@@ -23,8 +22,8 @@ def init_scheduler(app: Flask) -> BackgroundScheduler:
     _scheduler = BackgroundScheduler(timezone="UTC")
 
     def job() -> None:
-        db_path = Path(get_db_path())
-        refresh_recalls(db_path)
+        refresh_recalls()
+        SCHEDULER_JOBS.inc()
 
     trigger = CronTrigger(hour=2, minute=30)
     _scheduler.add_job(job, trigger, id="refresh_recalls", replace_existing=True)

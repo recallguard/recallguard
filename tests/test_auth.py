@@ -4,9 +4,7 @@ from backend.utils.auth import decode_access_token
 
 
 def setup(tmp_path, monkeypatch):
-    db = tmp_path / 'auth.db'
-    init_db(db)
-    monkeypatch.setenv('RECALLGUARD_DB', str(db))
+    init_db()
     app = create_app()
     return app.test_client()
 

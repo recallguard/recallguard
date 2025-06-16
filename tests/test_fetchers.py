@@ -29,13 +29,12 @@ def fake_get(url, params=None, timeout=10):
     return FakeResponse(data)
 
 def test_fetchers_insert(tmp_path, monkeypatch):
-    db = tmp_path / 't.db'
-    init_db(db)
-    monkeypatch.setenv('RECALLGUARD_DB', str(db))
+    init_db()
     monkeypatch.setattr(requests, 'get', fake_get)
-    refresh_recalls(db)
-    conn = connect(db)
-    count = conn.execute('SELECT COUNT(*) FROM recalls').fetchone()[0]
+    refresh_recalls()
+    conn = connect()
+    from sqlalchemy import text
+    count = conn.execute(text('SELECT COUNT(*) FROM recalls')).fetchone()[0]
     conn.close()
     assert count >= 1
 
