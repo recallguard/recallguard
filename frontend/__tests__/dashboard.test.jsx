@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
+
 jest.mock('@chakra-ui/react', () => {
   const React = require('react');
   return {
@@ -23,6 +24,8 @@ jest.mock('@chakra-ui/react', () => {
     Center: ({ children }) => <div>{children}</div>,
     HStack: ({ children }) => <div>{children}</div>,
     Flex: ({ children }) => <div>{children}</div>,
+    SimpleGrid: ({ children }) => <div>{children}</div>,
+    Text: ({ children }) => <span>{children}</span>,
     Spacer: () => <div />,
     IconButton: (props) => <button {...props} />,
     Button: ({ children, ...props }) => <button {...props}>{children}</button>,
@@ -47,15 +50,7 @@ beforeEach(() => {
   });
 });
 
-
-test('renders table rows after fetch', async () => {
-
-
-test('renders table rows after fetch', async () => {
-
 test('renders recall cards with hazard badge', async () => {
-
-
   render(
     <ChakraProvider>
       <AuthProvider>
@@ -66,4 +61,3 @@ test('renders recall cards with hazard badge', async () => {
   expect(await screen.findByText('Widget')).toBeInTheDocument();
   expect(screen.getByText('Fire hazard')).toBeInTheDocument();
 });
-

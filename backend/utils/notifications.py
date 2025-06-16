@@ -8,7 +8,6 @@ from backend.utils.session import SessionLocal
 
 from backend.db.models import sent_notifications, alerts
 
-from backend.db.models import subscriptions, sent_notifications, alerts
 
 
 
