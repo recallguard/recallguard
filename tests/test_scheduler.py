@@ -11,6 +11,11 @@ from backend.utils.refresh import refresh_recalls
 @pytest.mark.integration
 @freeze_time("2025-06-01")
 def test_manual_refresh_and_idempotent(tmp_path, monkeypatch):
+
+
+    db = tmp_path / "test.db"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db}")
+
     init_db()
 
     sample = [{"id": "99", "product": "Toy", "hazard": "Choking", "recall_date": "2025-05-30", "source": "cpsc"}]

@@ -6,6 +6,11 @@ import responses
 
 
 def test_match_subscriptions(tmp_path, monkeypatch):
+
+
+    db = tmp_path / 'n.db'
+    monkeypatch.setenv('DATABASE_URL', f'sqlite:///{db}')
+
     init_db()
     with SessionLocal() as db:
         db.execute(text("INSERT INTO subscriptions (user_id, recall_source, product_query) VALUES (1, 'cpsc', 'Widget')"))
@@ -17,6 +22,11 @@ def test_match_subscriptions(tmp_path, monkeypatch):
 
 
 def test_queue_notifications_inserts(tmp_path, monkeypatch):
+
+
+    db = tmp_path / 'n2.db'
+    monkeypatch.setenv('DATABASE_URL', f'sqlite:///{db}')
+
     init_db()
     with SessionLocal() as db:
         db.execute(text("INSERT INTO subscriptions (user_id, recall_source, product_query) VALUES (1, 'cpsc', 'Widget')"))

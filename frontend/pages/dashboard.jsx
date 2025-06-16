@@ -1,3 +1,7 @@
+
+
+
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Table,
@@ -24,6 +28,13 @@ import { useReactTable, getCoreRowModel, getFilteredRowModel } from '@tanstack/r
 import { useVirtualizer } from '@tanstack/react-virtual';
 import ReactMarkdown from 'react-markdown';
 
+
+import { useEffect, useState } from 'react';
+import { SimpleGrid, Box, Text, Badge } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
+
+
+
 export default function Dashboard() {
   const [recalls, setRecalls] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +56,9 @@ export default function Dashboard() {
       });
   }, []);
 
+
+
+
   const columns = useMemo(
     () => [
       { accessorKey: 'product', header: 'Product' },
@@ -58,6 +72,7 @@ export default function Dashboard() {
     ],
     []
   );
+
 
   const table = useReactTable({
     data: recalls,
@@ -77,11 +92,53 @@ export default function Dashboard() {
   const openDrawer = (row) => {
     setSelected(row.original);
     onOpen();
+
+
+  if (recalls === null) {
+    return <div>Loading...</div>;
+  }
+
+  if (recalls.length === 0) {
+    return <div className="text-green-600">No recent recalls.</div>;
+  }
+
+
+  const table = useReactTable({
+    data: recalls,
+    columns,
+    state: { globalFilter: filter },
+    getFilteredRowModel: getFilteredRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+
+  const rowVirtualizer = useVirtualizer({
+    count: table.getRowModel().rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 35,
+    overscan: 10,
+  });
+
+  const openDrawer = (row) => {
+    setSelected(row.original);
+    onOpen();
+
+  const hazardColor = (hazard) => {
+    const h = (hazard || '').toLowerCase();
+    if (h.includes('fire')) return 'red';
+    if (h.includes('injury')) return 'orange';
+    if (h.includes('chemical')) return 'yellow';
+    return 'gray';
+
+
   };
 
   const rows = rowVirtualizer.getVirtualItems();
 
   return (
+
+
+
     <Box p={4}>
       <Input
         placeholder="Search recalls..."
@@ -162,5 +219,33 @@ export default function Dashboard() {
         </DrawerContent>
       </Drawer>
     </Box>
+
+
+
+    <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4} p={4}>
+      {recalls.map((r) => (
+        <MotionBox
+          key={`${r.source}-${r.id}`}
+          p={4}
+          borderWidth="1px"
+          borderRadius="md"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Text fontWeight="bold" noOfLines={2} mb={2}>
+            {r.product}
+          </Text>
+          <Badge colorScheme={hazardColor(r.hazard)} mr={2} aria-label="hazard">
+            {truncate(r.hazard)}
+          </Badge>
+          <Badge>{r.source.toUpperCase()}</Badge>
+          <Text mt={2} fontSize="sm">
+            {r.recall_date}
+          </Text>
+        </MotionBox>
+      ))}
+    </SimpleGrid>
+
+
   );
 }

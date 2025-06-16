@@ -6,6 +6,7 @@ from backend.db.models import metadata
 import backend.utils.session as session_mod
 
 
+
 @pytest.fixture(autouse=True)
 def db_session(monkeypatch):
     url = "sqlite:///:memory:"
@@ -13,6 +14,20 @@ def db_session(monkeypatch):
         url, connect_args={"check_same_thread": False}, future=True
     )
     monkeypatch.setenv("DATABASE_URL", url)
+
+
+TEST_DB_URL = "sqlite:///:memory:"
+
+
+@pytest.fixture(autouse=True)
+def db_session(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", TEST_DB_URL)
+    from sqlalchemy.pool import StaticPool
+    engine = create_engine(
+        TEST_DB_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
     original = engine.dispose
 

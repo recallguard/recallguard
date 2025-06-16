@@ -1,5 +1,9 @@
 import Link from 'next/link';
 import { useContext } from 'react';
+
+
+
+
 import {
   Flex,
   Button,
@@ -15,12 +19,22 @@ import {
   Spacer,
 } from '@chakra-ui/react';
 import { HamburgerIcon, SunIcon, MoonIcon } from '@chakra-ui/icons';
+
+
+
+import { Flex, Button, IconButton, useColorMode } from '@chakra-ui/react';
+import { SunIcon, MoonIcon } from '@chakra-ui/icons';
+
+
 import { AuthContext } from './AuthContext.jsx';
 import AlertsModal from './AlertsModal.jsx';
 
 export default function Navbar() {
   const { token, logout } = useContext(AuthContext);
-  const { colorMode, toggleColorMode } = useColorMode();
+  const { colorMode, toggleColorMode } = useColorMode();n
+
+
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const MenuLinks = (
     <HStack spacing={4} align="center">
@@ -45,6 +59,9 @@ export default function Navbar() {
       />
     </HStack>
   );
+
+
+
 
   return (
     <Flex as="header" position="sticky" top="0" zIndex="1000" px={4} py={2} boxShadow="sm" bg="chakra-body-bg">
