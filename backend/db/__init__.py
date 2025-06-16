@@ -1,11 +1,13 @@
 """Database initialization helpers."""
 
-
+from __future__ import annotations
 
 from backend.utils.session import get_engine
 from sqlalchemy import text
 from .models import metadata
 from .seed_data import seed
+import sqlite3
+from pathlib import Path
 
 
 def init_db() -> None:
@@ -14,13 +16,6 @@ def init_db() -> None:
     with get_engine().connect() as conn:
         if not conn.execute(text('SELECT COUNT(*) FROM users')).fetchone()[0]:
             seed()
-
-
-
-from __future__ import annotations
-
-import sqlite3
-from pathlib import Path
 
 
 def create_tables(conn: sqlite3.Connection) -> None:
@@ -60,7 +55,7 @@ def create_tables(conn: sqlite3.Connection) -> None:
     )
 
 
-def init_db(db_path: Path) -> None:
+def init_db_path(db_path: Path) -> None:
     """Create tables and seed data if the DB is empty."""
     first = not Path(db_path).exists()
     conn = sqlite3.connect(db_path)
@@ -68,7 +63,7 @@ def init_db(db_path: Path) -> None:
     if first:
         from . import seed_data
 
-        seed_data.seed(Path(db_path))
+        seed_data.seed_path(Path(db_path))
     conn.close()
 
 

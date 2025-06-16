@@ -9,8 +9,6 @@ import os
 from sqlalchemy import text
 
 
-import os
-from sqlalchemy import text
 
 
 from backend.api.recalls import fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda
@@ -36,88 +34,28 @@ def refresh_recalls() -> Dict[str, int]:
             text("SELECT id FROM recalls WHERE id=:id AND source=:source"),
             {"id": r.get("id"), "source": r.get("source")},
         ).fetchone()
+        params = {
+            "id": r.get("id"),
+            "product": r.get("product"),
+            "hazard": r.get("hazard"),
+            "date": r.get("recall_date"),
+            "source": r.get("source"),
+            "f": datetime.utcnow().isoformat(),
+        }
         if existing:
             conn.execute(
-
                 text(
                     "UPDATE recalls SET product=:product, hazard=:hazard, recall_date=:date, fetched_at=:f WHERE id=:id AND source=:source"
                 ),
-                {
-                    "product": r.get("product"),
-                    "hazard": r.get("hazard"),
-                    "date": r.get("recall_date"),
-                    "f": datetime.utcnow().isoformat(),
-                    "id": r.get("id"),
-                    "source": r.get("source"),
-                },
-
-
-                text(
-                    "UPDATE recalls SET product=:product, hazard=:hazard, recall_date=:date, fetched_at=:f WHERE id=:id AND source=:source"
-                ),
-                {
-                    "product": r.get("product"),
-                    "hazard": r.get("hazard"),
-                    "date": r.get("recall_date"),
-                    "f": datetime.utcnow().isoformat(),
-                    "id": r.get("id"),
-                    "source": r.get("source"),
-                },
-
-                "UPDATE recalls SET product=?, hazard=?, recall_date=?, fetched_at=? "
-                "WHERE id=? AND source=?",
-                (
-                    r.get("product"),
-                    r.get("hazard"),
-                    r.get("recall_date"),
-                    datetime.utcnow().isoformat(),
-                    r.get("id"),
-                    r.get("source"),
-                ),
-
-
+                params,
             )
             updated += 1
         else:
             conn.execute(
-
                 text(
                     "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) VALUES (:id, :product, :hazard, :date, :source, :f)"
                 ),
-                {
-                    "id": r.get("id"),
-                    "product": r.get("product"),
-                    "hazard": r.get("hazard"),
-                    "date": r.get("recall_date"),
-                    "source": r.get("source"),
-                    "f": datetime.utcnow().isoformat(),
-                },
-
-
-                text(
-                    "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) VALUES (:id, :product, :hazard, :date, :source, :f)"
-                ),
-                {
-                    "id": r.get("id"),
-                    "product": r.get("product"),
-                    "hazard": r.get("hazard"),
-                    "date": r.get("recall_date"),
-                    "source": r.get("source"),
-                    "f": datetime.utcnow().isoformat(),
-                },
-
-                "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (
-                    r.get("id"),
-                    r.get("product"),
-                    r.get("hazard"),
-                    r.get("recall_date"),
-                    r.get("source"),
-                    datetime.utcnow().isoformat(),
-                ),
-
-
+                params,
             )
             new += 1
             new_recall_rows.append(r)
