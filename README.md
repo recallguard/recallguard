@@ -1,5 +1,7 @@
 # RecallGuard
 
+[![CI](https://github.com/recallguard/recallguard/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/recallguard/recallguard/actions/workflows/ci-cd.yml)
+
 
 
 
@@ -145,4 +147,19 @@ e
 
 Sample recall data used for tests is located under `tests/data`.
 
+
+
+## Local development via Docker
+Run all services with:
+```bash
+docker compose up --build
+```
+The API will be available at http://localhost:5000 and the dashboard at http://localhost:3000.
+
+
+## Deployment
+The project ships with a GitHub Actions workflow that builds Docker images and deploys to Fly.io and Vercel whenever `main` passes all tests. Set the following repository secrets:
+- `FLY_API_TOKEN`
+- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+- `PG_URL`, `JWT_SECRET`, `SENDGRID_API_KEY`
 

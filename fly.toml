@@ -1,0 +1,14 @@
+app = "recallguard"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+
+[deploy]
+  release_command = "alembic upgrade head"
+
+[processes]
+  api = "python run.py"
+  worker = "celery -A backend.tasks worker --loglevel=info"

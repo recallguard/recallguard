@@ -12,3 +12,26 @@ services:
     image: redis:7
     ports:
       - "6379:6379"
+  api:
+    build: ./backend
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "5000:5000"
+  worker:
+    build:
+      context: .
+      dockerfile: celery/Dockerfile
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+  frontend:
+    build: ./frontend
+    env_file: .env
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
