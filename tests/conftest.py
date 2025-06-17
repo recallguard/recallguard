@@ -7,15 +7,6 @@ import backend.utils.session as session_mod
 
 
 
-@pytest.fixture(autouse=True)
-def db_session(monkeypatch):
-    url = "sqlite:///:memory:"
-    engine = create_engine(
-        url, connect_args={"check_same_thread": False}, future=True
-    )
-    monkeypatch.setenv("DATABASE_URL", url)
-
-
 TEST_DB_URL = "sqlite:///:memory:"
 
 
