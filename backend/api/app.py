@@ -1,23 +1,13 @@
 from __future__ import annotations
 
-
 from datetime import datetime
-
-
-from datetime import datetime
-
-from pathlib import Path
-from datetime import datetime
-import sqlite3
-
-
 
 from flask import Flask, jsonify, request
 from sqlalchemy import text
+
 from .ops import bp as ops_bp
 from .notifications import bp as notifications_bp
 from backend.utils.logging import configure_logging
-
 from .recalls import fetch_all
 from backend.utils.refresh import refresh_recalls
 from .alerts import check_user_items, generate_summary
@@ -40,16 +30,6 @@ def create_app() -> Flask:
     configure_logging()
     init_db()
 
-
-    configure_logging()
-    init_db()
-
-    db_path = Path(get_db_path())
-    init_db(db_path)
-    app.config["DB_PATH"] = db_path
-
-
-
     @app.post('/api/auth/signup')
     def signup() -> tuple:
         data = request.get_json(force=True)
@@ -60,7 +40,9 @@ def create_app() -> Flask:
         conn = db_utils.connect()
         try:
             cur = conn.execute(
-                text('INSERT INTO users (email, password_hash, created_at) VALUES (:e, :p, :c)'),
+                text(
+                    'INSERT INTO users (email, password_hash, created_at) VALUES (:e, :p, :c)'
+                ),
                 {'e': email, 'p': hash_password(password), 'c': datetime.utcnow().isoformat()},
             )
             conn.commit()
@@ -89,15 +71,6 @@ def create_app() -> Flask:
         token = create_access_token({'user_id': mapping['id']})
         return jsonify({'token': token, 'user_id': mapping['id']})
 
-
-        token = create_access_token({'user_id': mapping['id']})
-        return jsonify({'token': token, 'user_id': mapping['id']})
-
-        token = create_access_token({'user_id': row['id']})
-        return jsonify({'token': token, 'user_id': row['id']})
-
-
-
     @app.get('/recalls')
     def recalls_route():
         return jsonify(fetch_all())
@@ -114,7 +87,10 @@ def create_app() -> Flask:
     def alerts_route():
         recalls = fetch_all()
         matches = check_user_items.check_user_items(USER_ITEMS, recalls)
-        summaries = [generate_summary.generate_summary({'title': 'Recall', 'product': m}) for m in matches]
+        summaries = [
+            generate_summary.generate_summary({'title': 'Recall', 'product': m})
+            for m in matches
+        ]
         return jsonify({'alerts': summaries})
 
     @app.get('/api/recalls/recent')
@@ -122,7 +98,9 @@ def create_app() -> Flask:
     def recent_recalls() -> tuple:
         conn = db_utils.connect()
         rows = conn.execute(
-            text('SELECT id, product, hazard, recall_date, source FROM recalls ORDER BY recall_date DESC LIMIT 25')
+            text(
+                'SELECT id, product, hazard, recall_date, source FROM recalls ORDER BY recall_date DESC LIMIT 25'
+            )
         ).fetchall()
         conn.close()
         return jsonify([dict(row._mapping) for row in rows])
@@ -132,20 +110,16 @@ def create_app() -> Flask:
     def user_recalls(user_id: int) -> tuple:
         conn = db_utils.connect()
         rows = conn.execute(
-            text('SELECT r.id, r.product, r.hazard, r.recall_date, r.source '
-                 'FROM recalls r JOIN products p ON lower(r.product)=lower(p.name) '
-                 'WHERE p.user_id=:u ORDER BY r.recall_date DESC'),
+            text(
+                'SELECT r.id, r.product, r.hazard, r.recall_date, r.source '
+                'FROM recalls r JOIN products p ON lower(r.product)=lower(p.name) '
+                'WHERE p.user_id=:u ORDER BY r.recall_date DESC'
+            ),
             {'u': user_id},
         ).fetchall()
         conn.close()
 
         return jsonify([dict(row._mapping) for row in rows])
-
-
-        return jsonify([dict(row._mapping) for row in rows])
-
-        return jsonify([dict(row) for row in rows])
-
 
     @app.post('/api/recalls/refresh')
     @jwt_required
@@ -157,12 +131,5 @@ def create_app() -> Flask:
 
     app.register_blueprint(ops_bp)
     app.register_blueprint(notifications_bp)
-
-
-
-    app.register_blueprint(ops_bp)
-    app.register_blueprint(notifications_bp)
-
-
 
     return app
