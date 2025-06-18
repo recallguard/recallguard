@@ -135,7 +135,6 @@ def create_app() -> Flask:
         recalls = get_recalls_for_vin(vin)
         return jsonify(recalls)
 
-
     @app.get("/api/check/<upc>")
     def check_upc(upc: str):
         if not upc.isdigit():
@@ -164,6 +163,20 @@ def create_app() -> Flask:
             }
         )
 
+    @app.get("/api/recall/<rid>")
+    @jwt_required
+    def recall_detail(rid: str):
+        conn = db_utils.connect()
+        row = conn.execute(
+            text(
+                "SELECT id, product, hazard, summary_text, next_steps, remedy_updates FROM recalls WHERE id=:r"
+            ),
+            {"r": rid},
+        ).fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"error": "not found"}), 404
+        return jsonify(dict(row._mapping))
 
     @app.post("/api/recalls/refresh")
     @jwt_required
