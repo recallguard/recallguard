@@ -109,3 +109,40 @@ email_unsub_tokens = Table(
     Column("token", String, nullable=False, unique=True),
     Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
+
+# API keys for partner access
+api_keys = Table(
+    "api_keys",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("org_name", String, nullable=False),
+    Column("key", String, nullable=False, unique=True),
+    Column("plan", String, server_default="free"),
+    Column("monthly_quota", Integer, server_default="5000"),
+    Column("requests_this_month", Integer, server_default="0"),
+    Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)
+
+# Slack/Teams channel subscriptions
+channel_subs = Table(
+    "channel_subs",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("platform", String),
+    Column("channel_id", String, nullable=False),
+    Column("query", String, nullable=False),
+    Column("source", String, server_default="CPSC"),
+    Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)
+
+# Partner webhooks
+webhooks = Table(
+    "webhooks",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("api_key_id", Integer, ForeignKey("api_keys.id")),
+    Column("url", String, nullable=False),
+    Column("query", String),
+    Column("source", String),
+    Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)

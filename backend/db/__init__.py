@@ -92,6 +92,43 @@ def create_tables(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS api_keys (
+            id INTEGER PRIMARY KEY,
+            org_name TEXT NOT NULL,
+            key TEXT NOT NULL UNIQUE,
+            plan TEXT DEFAULT 'free',
+            monthly_quota INTEGER DEFAULT 5000,
+            requests_this_month INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS channel_subs (
+            id INTEGER PRIMARY KEY,
+            platform TEXT,
+            channel_id TEXT NOT NULL,
+            query TEXT NOT NULL,
+            source TEXT DEFAULT 'CPSC',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS webhooks (
+            id INTEGER PRIMARY KEY,
+            api_key_id INTEGER REFERENCES api_keys(id),
+            url TEXT NOT NULL,
+            query TEXT,
+            source TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
 
 
 def init_db_path(db_path: Path) -> None:
