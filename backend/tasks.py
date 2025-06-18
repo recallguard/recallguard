@@ -15,47 +15,56 @@ import requests
 
 SLACK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
-celery = Celery('tasks', broker=os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0'))
+celery = Celery(
+    "tasks", broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+)
 
-@celery.task
+
+@celery.task(
+    autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 3}
+)
 def send_alert(alert_id: int) -> None:
     with SessionLocal() as db:
-        row = db.execute(
-            alerts.select().where(alerts.c.id == alert_id)
-        ).fetchone()
+        row = db.execute(alerts.select().where(alerts.c.id == alert_id)).fetchone()
         if not row:
             return
         mapping = row._mapping
         body = f"Recall {mapping['recall_id']}"  # simple message
-        api_key = os.getenv('SENDGRID_API_KEY')
+        api_key = os.getenv("SENDGRID_API_KEY")
         if api_key:
             message = Mail(
-                from_email=os.getenv('ALERTS_FROM_EMAIL', 'noreply@example.com'),
-                to_emails=mapping['user_id'],
-                subject='Recall Alert',
+                from_email=os.getenv("ALERTS_FROM_EMAIL", "noreply@example.com"),
+                to_emails=mapping["user_id"],
+                subject="Recall Alert",
                 plain_text_content=body,
             )
             try:
                 sg = SendGridAPIClient(api_key)
                 sg.send(message)
                 db.execute(
-                    alerts.update().where(alerts.c.id == alert_id).values(sent_at=datetime.utcnow().isoformat())
+                    alerts.update()
+                    .where(alerts.c.id == alert_id)
+                    .values(sent_at=datetime.utcnow().isoformat())
                 )
             except Exception as e:
                 db.execute(
                     alerts.update().where(alerts.c.id == alert_id).values(error=str(e))
                 )
         else:
-            print('send alert', alert_id, body)
+            print("send alert", alert_id, body)
             db.execute(
-                alerts.update().where(alerts.c.id == alert_id).values(sent_at=datetime.utcnow().isoformat())
+                alerts.update()
+                .where(alerts.c.id == alert_id)
+                .values(sent_at=datetime.utcnow().isoformat())
             )
         db.commit()
     for q in listeners:
-        q.put({'type': 'new_alert'})
+        q.put({"type": "new_alert"})
 
 
-@celery.task
+@celery.task(
+    autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 3}
+)
 def send_notifications(new_recalls: list[dict]) -> int:
     sent = 0
     db = SessionLocal()

@@ -1,4 +1,5 @@
 """Data refresh utilities."""
+
 from __future__ import annotations
 
 from typing import Dict, List
@@ -9,9 +10,11 @@ import os
 from sqlalchemy import text
 
 
-
-
 from backend.api.recalls import fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda
+from backend.utils.fetch_fda_enforcement import (
+    fetch_device_recalls,
+    fetch_drug_recalls,
+)
 from backend.utils import db as db_utils
 from backend.utils.alerts import create_alerts_for_new_recalls
 from backend.tasks import send_alert, send_notifications
@@ -28,6 +31,8 @@ def refresh_recalls() -> Dict[str, int]:
     recalls: List[Dict] = []
     for func in (fetch_cpsc, fetch_fda, fetch_nhtsa, fetch_usda):
         recalls.extend(func(use_cache=False))
+    recalls.extend(fetch_drug_recalls())
+    recalls.extend(fetch_device_recalls())
 
     for r in recalls:
         existing = conn.execute(
@@ -61,7 +66,7 @@ def refresh_recalls() -> Dict[str, int]:
             new_recall_rows.append(r)
     trans.commit()
     alert_ids = create_alerts_for_new_recalls(conn, recalls)
-    if os.getenv('CELERY_BROKER_URL'):
+    if os.getenv("CELERY_BROKER_URL"):
         for aid in alert_ids:
             send_alert.delay(aid)
         if new_recall_rows:
