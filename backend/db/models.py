@@ -156,3 +156,16 @@ invites = Table(
     Column("recall_id", String),
     Column("sent_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
+
+# Stripe billing info
+stripe_customers = Table(
+    "stripe_customers",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), unique=True),
+    Column("stripe_customer_id", String),
+    Column("subscription_id", String),
+    Column("plan", String, server_default="free"),
+    Column("quota", Integer, server_default="100"),
+    Column("seats", Integer, server_default="1"),
+)

@@ -52,3 +52,13 @@ CREATE TABLE webhooks (
     source TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE stripe_customers (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE,
+    stripe_customer_id TEXT,
+    subscription_id TEXT,
+    plan TEXT DEFAULT 'free',
+    quota INTEGER DEFAULT 100,
+    seats INTEGER DEFAULT 1
+);

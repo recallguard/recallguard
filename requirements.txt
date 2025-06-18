@@ -36,4 +36,5 @@ sendgrid==6.11.0
 responses==0.25.0
 requests-mock==1.12.1
 slack-bolt==1.18.1
+stripe==8.8.0
 

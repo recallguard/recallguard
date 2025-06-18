@@ -42,6 +42,11 @@ def seed() -> None:
             ),
             {"n": "Demo Org", "k": "demo-key"},
         )
+        conn.execute(
+            text(
+                "INSERT INTO stripe_customers (user_id, plan, quota, seats) VALUES (1, 'free', 100, 1)"
+            )
+        )
 
 
 def seed_path(db_path: Path) -> None:
@@ -67,6 +72,9 @@ def seed_path(db_path: Path) -> None:
     cur.execute(
         "INSERT INTO api_keys (org_name, key, plan) VALUES (?, ?, 'free')",
         ("Demo Org", "demo-key"),
+    )
+    cur.execute(
+        "INSERT INTO stripe_customers (user_id, plan, quota, seats) VALUES (1, 'free', 100, 1)"
     )
     conn.commit()
     conn.close()
