@@ -1,0 +1,15 @@
+{
+  "welcome": "Bienvenido a RecallGuard",
+  "login": "Iniciar sesión",
+  "logout": "Cerrar sesión",
+  "home": "Inicio",
+  "transparency": "Transparencia",
+  "data_sources": "Fuentes de datos",
+  "uptime_status": "Estado",
+  "avg_latency": "Latencia promedio de alertas",
+  "status_ok": "Activo",
+  "status_error": "Error",
+  "email": "Correo",
+  "password": "Contraseña",
+  "invalid_credentials": "Credenciales inválidas"
+}

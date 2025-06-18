@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, Response, request
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from time import time
+from datetime import datetime
 from sqlalchemy import text
 from backend.utils.session import get_engine
 
@@ -33,3 +34,22 @@ def healthz():
 @bp.route('/metrics')
 def metrics():
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
+
+
+@bp.route('/latency')
+def avg_latency():
+    engine = get_engine()
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text("SELECT recall_date, fetched_at FROM recalls WHERE recall_date IS NOT NULL AND fetched_at IS NOT NULL")
+        ).fetchall()
+    vals = []
+    for r in rows:
+        try:
+            recall_dt = datetime.fromisoformat(r._mapping["recall_date"])
+            fetched_dt = datetime.fromisoformat(r._mapping["fetched_at"])
+            vals.append((fetched_dt - recall_dt).total_seconds())
+        except Exception:
+            pass
+    avg = sum(vals) / len(vals) if vals else 0
+    return jsonify({"average_latency_seconds": avg})

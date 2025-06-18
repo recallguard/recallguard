@@ -1,10 +1,12 @@
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { AuthContext } from '../components/AuthContext.jsx';
 import { apiFetch } from '../utils/api.js';
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export default function Login() {
       login(data.token);
       router.push('/');
     } else {
-      setError('Invalid credentials');
+      setError(t('invalid_credentials'));
     }
   };
 
@@ -32,7 +34,7 @@ export default function Login() {
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
+          placeholder={t('email')}
         />
       </div>
       <div>
@@ -40,11 +42,11 @@ export default function Login() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
+          placeholder={t('password')}
         />
       </div>
       {error && <div style={{ color: 'red' }}>{error}</div>}
-      <button type="submit">Login</button>
+      <button type="submit">{t('login')}</button>
     </form>
   );
 }

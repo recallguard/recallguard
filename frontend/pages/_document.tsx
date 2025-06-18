@@ -2,9 +2,10 @@ import { Html, Head, Main, NextScript } from 'next/document';
 import { ColorModeScript } from '@chakra-ui/react';
 import theme from '../theme.tsx';
 
-export default function Document() {
+export default function Document(props) {
+  const locale = props.__NEXT_DATA__.locale || 'en';
   return (
-    <Html lang="en">
+    <Html lang={locale}>
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

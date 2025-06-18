@@ -24,7 +24,7 @@ from backend.utils.auth import (
     jwt_required,
 )
 from backend.db.models import invites
-from backend.utils.email_utils import send_email
+from backend.utils.email_utils import send_email, parse_language
 from urllib.parse import quote
 import os
 
@@ -202,7 +202,8 @@ def create_app() -> Flask:
             "share_twitter": f"https://twitter.com/intent/tweet?text={quote(text_copy)}&url={quote(share_url)}",
             "share_facebook": f"https://www.facebook.com/sharer/sharer.php?u={quote(share_url)}&quote={quote(text_copy)}",
         }
-        send_email(email, "You've been invited to RecallHero", "recall_alert.html", context)
+        lang = parse_language(request.headers.get("Accept-Language"))
+        send_email(email, "You've been invited to RecallHero", "recall_alert.html", context, lang)
         return jsonify({"status": "sent"})
 
     @app.post("/api/recalls/refresh")

@@ -1,0 +1,15 @@
+{
+  "welcome": "Welcome to RecallGuard",
+  "login": "Login",
+  "logout": "Logout",
+  "home": "Home",
+  "transparency": "Transparency",
+  "data_sources": "Data Sources",
+  "uptime_status": "Uptime Status",
+  "avg_latency": "Avg. Recall-surfacing Latency",
+  "status_ok": "OK",
+  "status_error": "Error",
+  "email": "Email",
+  "password": "Password",
+  "invalid_credentials": "Invalid credentials"
+}
