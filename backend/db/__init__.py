@@ -53,6 +53,19 @@ def create_tables(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_items (
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            upc TEXT NOT NULL,
+            label TEXT,
+            profile TEXT NOT NULL DEFAULT 'self',
+            added_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+        """
+    )
 
 
 def init_db_path(db_path: Path) -> None:

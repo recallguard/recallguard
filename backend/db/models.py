@@ -70,3 +70,15 @@ sent_notifications = Table(
     Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
     Column("recall_id", String, primary_key=True),
 )
+
+# Items saved by users via the "My Stuff" locker
+user_items = Table(
+    "user_items",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("upc", String, nullable=False),
+    Column("label", String),
+    Column("profile", String, nullable=False, server_default="self"),
+    Column("added_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)

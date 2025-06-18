@@ -11,6 +11,7 @@ from backend.utils.session import SessionLocal
 from backend.db.models import alerts
 from backend.api.notifications import listeners
 from backend.utils.notifications import queue_notifications
+from sqlalchemy import text
 import requests
 
 SLACK_URL = os.getenv("SLACK_WEBHOOK_URL")
@@ -85,3 +86,19 @@ def send_notifications(new_recalls: list[dict]) -> int:
         db.close()
         SessionLocal.remove()
     return sent
+
+
+@celery.task
+def check_user_items_and_alert() -> None:
+    """Placeholder daily scan of UserItem rows."""
+    from backend.db.models import user_items
+    with SessionLocal() as db:
+        rows = db.execute(user_items.select()).fetchall()
+        for r in rows:
+            upc = r._mapping["upc"]
+            status = db.execute(
+                text("SELECT 1 FROM recalls WHERE product=:p"), {"p": upc}
+            ).fetchone()
+            if status:
+                # In a real task we'd queue an alert
+                print(f"Alert user {r._mapping['user_id']} UPC {upc} recalled")
