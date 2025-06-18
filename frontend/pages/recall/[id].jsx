@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../components/AuthContext.jsx';
-import ShareButtons from '../../components/ShareButtons.jsx';
+import { ShareButtons } from '@recallhero/shared';
 
 export default function RecallDetail() {
   const router = useRouter();

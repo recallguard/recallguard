@@ -1,4 +1,4 @@
-import ShareButtons from './ShareButtons.jsx';
+import { ShareButtons } from '@recallhero/shared';
 
 export default function AlertModal({ message, recall }) {
   const text = recall
