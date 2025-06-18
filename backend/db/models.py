@@ -9,6 +9,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     UniqueConstraint,
     text,
+    JSON,
 )
 
 metadata = MetaData()
@@ -40,6 +41,9 @@ recalls = Table(
     Column("recall_date", String),
     Column("source", String, nullable=False),
     Column("fetched_at", String, nullable=False),
+    Column("summary_text", Text),
+    Column("next_steps", Text),
+    Column("remedy_updates", JSON, server_default="[]"),
     PrimaryKeyConstraint("id", "source"),
 )
 
