@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from .ops import bp as ops_bp
 from .notifications import bp as notifications_bp
+from .items import bp as items_bp
 from backend.utils.logging import configure_logging
 from .recalls import fetch_all
 from backend.utils.refresh import refresh_recalls
@@ -174,5 +175,6 @@ def create_app() -> Flask:
 
     app.register_blueprint(ops_bp)
     app.register_blueprint(notifications_bp)
+    app.register_blueprint(items_bp)
 
     return app

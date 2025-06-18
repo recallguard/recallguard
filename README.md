@@ -121,5 +121,17 @@ JSON response of `{ status: "safe" }` indicates no recall. If a recall is
 found, the response includes the recall ID, product name, hazard and link
 to more details.
 
+## My Stuff Locker
+
+Authenticated users can save products they own via the `/api/items` endpoints.
+
+- `GET /api/items` – list saved items with recall status
+- `POST /api/items` – add an item `{ upc, label?, profile? }`
+- `DELETE /api/items/<id>` – remove an item
+
+Visit `/mystuff` in the frontend to view and manage these items. Products are
+grouped by profile (Me, My Kids, My Pets) and each entry shows whether the UPC
+is currently recalled.
+
 
 
