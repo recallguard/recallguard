@@ -8,7 +8,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from backend.utils.session import SessionLocal
-from backend.db.models import alerts
+from backend.db.models import alerts, email_unsub_tokens
 from backend.api.notifications import listeners
 from backend.utils.notifications import queue_notifications
 from sqlalchemy import text
@@ -30,12 +30,29 @@ def send_alert(alert_id: int) -> None:
         if not row:
             return
         mapping = row._mapping
+        user_row = db.execute(text("SELECT email FROM users WHERE id=:u"), {"u": mapping["user_id"]}).fetchone()
+        email = user_row._mapping["email"] if user_row else None
         body = f"Recall {mapping['recall_id']}"  # simple message
+        # ensure an unsubscribe token exists
+        token_row = db.execute(
+            text("SELECT token FROM email_unsub_tokens WHERE user_id=:u"),
+            {"u": mapping["user_id"]},
+        ).fetchone()
+        if not token_row:
+            import secrets
+
+            token = secrets.token_urlsafe(16)
+            db.execute(email_unsub_tokens.insert().values(user_id=mapping["user_id"], token=token))
+            unsub_token = token
+        else:
+            unsub_token = token_row._mapping["token"]
+        base_url = os.getenv("BASE_URL", "")
+        body += f"\n\nTo unsubscribe click: {base_url}/api/unsubscribe/{unsub_token}"
         api_key = os.getenv("SENDGRID_API_KEY")
         if api_key:
             message = Mail(
                 from_email=os.getenv("ALERTS_FROM_EMAIL", "noreply@example.com"),
-                to_emails=mapping["user_id"],
+                to_emails=email,
                 subject="Recall Alert",
                 plain_text_content=body,
             )

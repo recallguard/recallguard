@@ -7,7 +7,7 @@ from sqlalchemy import text
 from queue import Queue
 
 from backend.utils.session import SessionLocal
-from backend.db.models import alerts, subscriptions
+from backend.db.models import alerts, subscriptions, push_tokens, email_unsub_tokens
 from backend.utils.auth import jwt_required, get_jwt_subject
 
 bp = Blueprint('alerts', __name__)
@@ -89,3 +89,45 @@ def email_opt_in():
         )
         db.commit()
     return jsonify({'status': 'ok'})
+
+
+@bp.post('/api/push/register')
+@jwt_required
+def register_push() -> tuple:
+    user_id = get_jwt_subject()['user_id']
+    data = request.get_json(force=True)
+    token = data.get('token')
+    if not token:
+        return jsonify({'error': 'missing token'}), 400
+    with SessionLocal() as db:
+        exists = db.execute(
+            push_tokens.select().where(push_tokens.c.user_id == user_id, push_tokens.c.token == token)
+        ).fetchone()
+        if not exists:
+            db.execute(push_tokens.insert().values(user_id=user_id, token=token))
+            db.commit()
+    return jsonify({'status': 'ok'})
+
+
+@bp.delete('/api/push/<token>')
+@jwt_required
+def delete_push(token: str) -> tuple:
+    user_id = get_jwt_subject()['user_id']
+    with SessionLocal() as db:
+        db.execute(
+            push_tokens.delete().where(push_tokens.c.user_id == user_id, push_tokens.c.token == token)
+        )
+        db.commit()
+    return jsonify({'status': 'ok'})
+
+
+@bp.get('/api/unsubscribe/<token>')
+def unsubscribe(token: str):
+    with SessionLocal() as db:
+        row = db.execute(email_unsub_tokens.select().where(email_unsub_tokens.c.token == token)).fetchone()
+        if not row:
+            return 'Invalid token', 404
+        user_id = row._mapping['user_id']
+        db.execute(text('UPDATE users SET email_opt_in=0 WHERE id=:u'), {'u': user_id})
+        db.commit()
+    return Response("You're unsubscribed", mimetype='text/html')
