@@ -1,3 +1,4 @@
+import { checkCode } from '@recallhero/shared/lib/scan-core';
 import { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
@@ -10,10 +11,7 @@ export default function ScanPage() {
     scanner.render(
       (text) => {
         scanner.clear();
-        fetch(`/api/check/${encodeURIComponent(text)}`)
-          .then((r) => r.json())
-          .then((data) => setResult(data))
-          .catch(() => {});
+        checkCode(text).then(setResult).catch(() => {});
       },
       () => {}
     );
