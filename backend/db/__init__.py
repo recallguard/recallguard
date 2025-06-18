@@ -49,6 +49,9 @@ def create_tables(conn: sqlite3.Connection) -> None:
             recall_date TEXT,
             source TEXT NOT NULL,
             fetched_at TEXT NOT NULL,
+            summary_text TEXT,
+            next_steps TEXT,
+            remedy_updates JSON DEFAULT '[]',
             PRIMARY KEY (id, source)
         )
         """

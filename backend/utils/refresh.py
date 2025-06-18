@@ -18,6 +18,7 @@ from backend.utils.fetch_fda_enforcement import (
 from backend.utils import db as db_utils
 from backend.utils.alerts import create_alerts_for_new_recalls
 from backend.tasks import send_alert, send_notifications
+from backend.utils.ai_summary import summarize_recall
 
 
 def refresh_recalls() -> Dict[str, int]:
@@ -36,9 +37,14 @@ def refresh_recalls() -> Dict[str, int]:
 
     for r in recalls:
         existing = conn.execute(
-            text("SELECT id FROM recalls WHERE id=:id AND source=:source"),
+            text("SELECT hazard FROM recalls WHERE id=:id AND source=:source"),
             {"id": r.get("id"), "source": r.get("source")},
         ).fetchone()
+
+        summary, next_step = summarize_recall(
+            r.get("product", ""), r.get("hazard", ""), r.get("classification")
+        )
+
         params = {
             "id": r.get("id"),
             "product": r.get("product"),
@@ -46,11 +52,15 @@ def refresh_recalls() -> Dict[str, int]:
             "date": r.get("recall_date"),
             "source": r.get("source"),
             "f": datetime.utcnow().isoformat(),
+            "summary": summary,
+            "next": next_step,
+            "updates": "[]",
         }
+
         if existing:
             conn.execute(
                 text(
-                    "UPDATE recalls SET product=:product, hazard=:hazard, recall_date=:date, fetched_at=:f WHERE id=:id AND source=:source"
+                    "UPDATE recalls SET product=:product, hazard=:hazard, recall_date=:date, fetched_at=:f, summary_text=:summary, next_steps=:next WHERE id=:id AND source=:source"
                 ),
                 params,
             )
@@ -58,7 +68,7 @@ def refresh_recalls() -> Dict[str, int]:
         else:
             conn.execute(
                 text(
-                    "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at) VALUES (:id, :product, :hazard, :date, :source, :f)"
+                    "INSERT INTO recalls (id, product, hazard, recall_date, source, fetched_at, summary_text, next_steps, remedy_updates) VALUES (:id, :product, :hazard, :date, :source, :f, :summary, :next, :updates)"
                 ),
                 params,
             )
