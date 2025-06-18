@@ -95,4 +95,20 @@ The project ships with a GitHub Actions workflow that builds Docker images and d
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
 - `PG_URL`, `JWT_SECRET`, `SENDGRID_API_KEY`, `SLACK_WEBHOOK_URL`
 
+## Additional Recall Sources
+
+The ingest pipeline also fetches drug and device enforcement data from openFDA:
+
+- `https://api.fda.gov/drug/enforcement.json?search=status:"Ongoing"&limit=100`
+- `https://api.fda.gov/device/enforcement.json?search=status:"Ongoing"&limit=100`
+
+Vehicle owners can look up recalls by VIN via the authenticated endpoint:
+
+```
+GET /api/recalls/vin/<vin>
+```
+
+Provide a 17 character alphanumeric VIN. The route returns any matching recalls
+but does not automatically generate alerts.
+
 
