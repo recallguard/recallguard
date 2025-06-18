@@ -8,14 +8,24 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from backend.utils.session import SessionLocal
-from backend.db.models import alerts, email_unsub_tokens, recalls, push_tokens
+from backend.db.models import (
+    alerts,
+    email_unsub_tokens,
+    recalls,
+    push_tokens,
+    channel_subs,
+    webhooks,
+)
 from backend.api.notifications import listeners
 from backend.utils.notifications import queue_notifications
 from sqlalchemy import text
 import requests
 import json
+from slack_sdk import WebClient
 
 SLACK_URL = os.getenv("SLACK_WEBHOOK_URL")
+SLACK_TOKEN = os.getenv("SLACK_BOT_TOKEN")
+slack_client = WebClient(token=SLACK_TOKEN) if SLACK_TOKEN else None
 
 celery = Celery(
     "tasks", broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
@@ -121,6 +131,38 @@ def send_notifications(new_recalls: list[dict]) -> int:
                             "text": f"\ud83d\udea8 *{recall['source'].upper()}* recall: *{recall['product']}* <{recall.get('url','')}|Read more>"
                         },
                     )
+                except Exception:
+                    pass
+            # channel subscriptions via Slack bot
+            if slack_client:
+                rows = db.execute(
+                    channel_subs.select().where(
+                        channel_subs.c.platform == "slack",
+                        channel_subs.c.source == recall.get("source").upper(),
+                    )
+                ).fetchall()
+                for r in rows:
+                    if r._mapping["query"].lower() not in recall.get("product", "").lower():
+                        continue
+                    try:
+                        slack_client.chat_postMessage(
+                            channel=r._mapping["channel_id"],
+                            text=f"*:rotating_light: {recall['source'].upper()} recall:* {recall['product']}"
+                        )
+                    except Exception:
+                        pass
+            # partner webhooks
+            hooks = db.execute(
+                webhooks.select().where(
+                    (webhooks.c.source.is_(None)) | (webhooks.c.source == recall.get("source"))
+                )
+            ).fetchall()
+            for wh in hooks:
+                q = wh._mapping["query"]
+                if q and q.lower() not in recall.get("product", "").lower():
+                    continue
+                try:
+                    requests.post(wh._mapping["url"], json=recall, timeout=5)
                 except Exception:
                     pass
     finally:

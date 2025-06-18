@@ -36,6 +36,12 @@ def seed() -> None:
                 "INSERT INTO subscriptions (user_id, recall_source, product_query) VALUES (1, 'cpsc', 'Widget')"
             )
         )
+        conn.execute(
+            text(
+                "INSERT INTO api_keys (org_name, key, plan) VALUES (:n, :k, 'free')"
+            ),
+            {"n": "Demo Org", "k": "demo-key"},
+        )
 
 
 def seed_path(db_path: Path) -> None:
@@ -57,6 +63,10 @@ def seed_path(db_path: Path) -> None:
             "cpsc",
             datetime.utcnow().isoformat(),
         ),
+    )
+    cur.execute(
+        "INSERT INTO api_keys (org_name, key, plan) VALUES (?, ?, 'free')",
+        ("Demo Org", "demo-key"),
     )
     conn.commit()
     conn.close()
