@@ -134,6 +134,36 @@ def create_app() -> Flask:
         recalls = get_recalls_for_vin(vin)
         return jsonify(recalls)
 
+
+    @app.get("/api/check/<upc>")
+    def check_upc(upc: str):
+        if not upc.isdigit():
+            return jsonify({"error": "invalid upc"}), 400
+        conn = db_utils.connect()
+        info = conn.execute(text("PRAGMA table_info(recalls)")).fetchall()
+        cols = {r[1] for r in info}
+        query = "SELECT id, product, hazard"
+        query += ", url" if "url" in cols else ", '' as url"
+        query += " FROM recalls WHERE product=:p"
+        params = {"p": upc}
+        if "details" in cols:
+            query += " OR json_extract(details, '$.upc')=:p"
+        row = conn.execute(text(query), params).fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"status": "safe"})
+        m = row._mapping
+        return jsonify(
+            {
+                "status": "recalled",
+                "recall_id": m["id"],
+                "product_name": m["product"],
+                "hazard": m["hazard"],
+                "url": m["url"],
+            }
+        )
+
+
     @app.post("/api/recalls/refresh")
     @jwt_required
     def manual_refresh() -> tuple:
