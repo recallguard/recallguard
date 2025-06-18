@@ -34,4 +34,5 @@ prometheus-client==0.20.0
 celery==5.3.6
 sendgrid==6.11.0
 responses==0.25.0
+requests-mock==1.12.1
 
