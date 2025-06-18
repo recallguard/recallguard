@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../components/AuthContext.jsx';
+import ShareButtons from '../../components/ShareButtons.jsx';
 
 export default function RecallDetail() {
   const router = useRouter();
@@ -30,6 +31,10 @@ export default function RecallDetail() {
           </div>
         ))}
       </div>
+      <ShareButtons
+        url={`${process.env.NEXT_PUBLIC_FRONTEND_ORIGIN}/signup?src=share`}
+        text={`Recall alert: ${recall.product} – stay safe with RecallHero`}
+      />
     </div>
   );
 }

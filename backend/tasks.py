@@ -4,8 +4,8 @@ import os
 from datetime import datetime
 
 from celery import Celery
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from backend.utils.email_utils import send_email
+from urllib.parse import quote
 
 from backend.utils.session import SessionLocal
 from backend.db.models import (
@@ -58,11 +58,6 @@ def send_alert(alert_id: int, subject: str | None = None) -> None:
         ).fetchone()
         summary = recall_row._mapping.get("summary_text") if recall_row else ""
         steps = recall_row._mapping.get("next_steps") if recall_row else ""
-        body = f"Recall {mapping['recall_id']}"  # simple message
-        if summary:
-            body += f"\n\nSummary: {summary}"
-        if steps:
-            body += f"\nNext: {steps}"
         # ensure an unsubscribe token exists
         token_row = db.execute(
             text("SELECT token FROM email_unsub_tokens WHERE user_id=:u"),
@@ -81,34 +76,25 @@ def send_alert(alert_id: int, subject: str | None = None) -> None:
         else:
             unsub_token = token_row._mapping["token"]
         base_url = os.getenv("BASE_URL", "")
-        body += f"\n\nTo unsubscribe click: {base_url}/api/unsubscribe/{unsub_token}"
-        api_key = os.getenv("SENDGRID_API_KEY")
-        if api_key:
-            message = Mail(
-                from_email=os.getenv("ALERTS_FROM_EMAIL", "noreply@example.com"),
-                to_emails=email,
-                subject=subject or "Recall Alert",
-                plain_text_content=body,
-            )
-            try:
-                sg = SendGridAPIClient(api_key)
-                sg.send(message)
-                db.execute(
-                    alerts.update()
-                    .where(alerts.c.id == alert_id)
-                    .values(sent_at=datetime.utcnow().isoformat())
-                )
-            except Exception as e:
-                db.execute(
-                    alerts.update().where(alerts.c.id == alert_id).values(error=str(e))
-                )
-        else:
-            print("send alert", alert_id, subject or "Recall Alert", body)
-            db.execute(
-                alerts.update()
-                .where(alerts.c.id == alert_id)
-                .values(sent_at=datetime.utcnow().isoformat())
-            )
+        share_url = f"{os.getenv('FRONTEND_ORIGIN', '')}/signup?src=share"
+        text_copy = (
+            f"Recall alert: {recall_row._mapping.get('product')} – stay safe with RecallHero"
+        )
+        context = {
+            "share_twitter": f"https://twitter.com/intent/tweet?text={quote(text_copy)}&url={quote(share_url)}",
+            "share_facebook": f"https://www.facebook.com/sharer/sharer.php?u={quote(share_url)}&quote={quote(text_copy)}",
+        }
+        send_email(
+            email,
+            subject or "Recall Alert",
+            "recall_alert.html",
+            context,
+        )
+        db.execute(
+            alerts.update()
+            .where(alerts.c.id == alert_id)
+            .values(sent_at=datetime.utcnow().isoformat())
+        )
         db.commit()
     for q in listeners:
         q.put({"type": "new_alert"})

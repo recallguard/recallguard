@@ -146,3 +146,13 @@ webhooks = Table(
     Column("source", String),
     Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
+
+# Friend invite tracking
+invites = Table(
+    "invites",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("email", String, nullable=False),
+    Column("recall_id", String),
+    Column("sent_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)

@@ -23,6 +23,10 @@ from backend.utils.auth import (
     verify_password,
     jwt_required,
 )
+from backend.db.models import invites
+from backend.utils.email_utils import send_email
+from urllib.parse import quote
+import os
 
 # simple in-memory store for user items
 USER_ITEMS: list[str] = []
@@ -179,6 +183,27 @@ def create_app() -> Flask:
         if not row:
             return jsonify({"error": "not found"}), 404
         return jsonify(dict(row._mapping))
+
+    @app.post("/api/invite")
+    @jwt_required
+    def invite_friend() -> tuple:
+        data = request.get_json(force=True)
+        email = data.get("email")
+        recall_id = data.get("recall_id")
+        if not email:
+            return jsonify({"error": "invalid"}), 400
+        conn = db_utils.connect()
+        conn.execute(invites.insert().values(email=email, recall_id=recall_id))
+        conn.commit()
+        conn.close()
+        text_copy = "Join RecallHero to stay informed about product recalls"
+        share_url = f"{os.getenv('FRONTEND_ORIGIN', '')}/signup?src=invite"
+        context = {
+            "share_twitter": f"https://twitter.com/intent/tweet?text={quote(text_copy)}&url={quote(share_url)}",
+            "share_facebook": f"https://www.facebook.com/sharer/sharer.php?u={quote(share_url)}&quote={quote(text_copy)}",
+        }
+        send_email(email, "You've been invited to RecallHero", "recall_alert.html", context)
+        return jsonify({"status": "sent"})
 
     @app.post("/api/recalls/refresh")
     @jwt_required
