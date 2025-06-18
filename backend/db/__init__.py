@@ -129,6 +129,16 @@ def create_tables(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS invites (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL,
+            recall_id TEXT,
+            sent_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
 
 
 def init_db_path(db_path: Path) -> None:
