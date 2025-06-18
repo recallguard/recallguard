@@ -10,6 +10,7 @@ from .notifications import bp as notifications_bp
 from .items import bp as items_bp
 from .partner import bp as partner_bp
 from .slackbot import bp as slackbot_bp
+from .billing import bp as billing_bp
 from backend.utils.logging import configure_logging
 from .recalls import fetch_all
 from backend.utils.refresh import refresh_recalls
@@ -22,6 +23,7 @@ from backend.utils.auth import (
     hash_password,
     verify_password,
     jwt_required,
+    track_quota,
 )
 from backend.db.models import invites
 from backend.utils.email_utils import send_email, parse_language
@@ -107,6 +109,7 @@ def create_app() -> Flask:
 
     @app.get("/api/recalls/recent")
     @jwt_required
+    @track_quota
     def recent_recalls() -> tuple:
         conn = db_utils.connect()
         rows = conn.execute(
@@ -219,5 +222,6 @@ def create_app() -> Flask:
     app.register_blueprint(items_bp)
     app.register_blueprint(partner_bp)
     app.register_blueprint(slackbot_bp)
+    app.register_blueprint(billing_bp)
 
     return app

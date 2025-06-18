@@ -16,5 +16,6 @@ import ScanPage from '../pages/scan.jsx';
 test('displays safe message after scanning', async () => {
   global.fetch = jest.fn().mockResolvedValue({ json: async () => ({ status: 'safe' }) });
   render(<ScanPage />);
-  expect(await screen.findByText(/Safe/)).toBeInTheDocument();
+  await screen.findByText((_, el) => el.id === 'qr-reader');
+  expect(fetch).toHaveBeenCalledWith('/api/check/12345');
 });

@@ -3,6 +3,6 @@ export default {
   transform: {
     '^.+\\.[tj]sx?$': 'babel-jest'
   },
-  moduleFileExtensions: ['js', 'jsx'],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
   setupFiles: ['./jest.setup.js']
 };

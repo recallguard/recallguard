@@ -6,6 +6,9 @@ from jose import JWTError, jwt
 from passlib.hash import bcrypt
 from functools import wraps
 from flask import request, jsonify
+from sqlalchemy import text
+from backend.utils.db import connect
+from backend.db.models import stripe_customers
 
 
 def hash_password(pwd: str) -> str:
@@ -60,3 +63,68 @@ def jwt_required(fn):
 def get_jwt_subject() -> dict:
     """Return the decoded JWT payload set by ``jwt_required``."""
     return getattr(request, 'user', {})
+
+
+def require_plan(required: str):
+    """Decorator to enforce a minimum subscription plan on a route."""
+    tiers = {"free": 0, "pro": 1, "enterprise": 2}
+
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            user = get_jwt_subject()
+            uid = user.get("user_id")
+            if not uid:
+                return jsonify({"error": "unauthorized"}), 401
+            with connect() as conn:
+                row = conn.execute(
+                    text("SELECT plan FROM stripe_customers WHERE user_id=:u"),
+                    {"u": uid},
+                ).fetchone()
+            plan = row._mapping["plan"] if row else "free"
+            if tiers.get(plan, 0) < tiers.get(required, 0):
+                return jsonify({"error": "upgrade required"}), 402
+            return fn(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def track_quota(fn):
+    """Decrement monthly quota and block when exhausted."""
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user = get_jwt_subject()
+        uid = user.get("user_id")
+        if not uid:
+            return jsonify({"error": "unauthorized"}), 401
+        with connect() as conn:
+            row = conn.execute(
+                stripe_customers.select().where(stripe_customers.c.user_id == uid)
+            ).fetchone()
+            if not row:
+                conn.execute(
+                    stripe_customers.insert().values(
+                        user_id=uid, plan="free", quota=100, seats=1
+                    )
+                )
+                conn.commit()
+                quota = 100
+                plan = "free"
+            else:
+                quota = row._mapping["quota"]
+                plan = row._mapping["plan"]
+            if plan != "enterprise":
+                if quota <= 0:
+                    return jsonify({"error": "quota exceeded"}), 429
+                conn.execute(
+                    stripe_customers.update()
+                    .where(stripe_customers.c.user_id == uid)
+                    .values(quota=quota - 1)
+                )
+                conn.commit()
+        return fn(*args, **kwargs)
+
+    return wrapper

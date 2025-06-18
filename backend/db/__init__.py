@@ -139,6 +139,19 @@ def create_tables(conn: sqlite3.Connection) -> None:
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS stripe_customers (
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER UNIQUE,
+            stripe_customer_id TEXT,
+            subscription_id TEXT,
+            plan TEXT DEFAULT 'free',
+            quota INTEGER DEFAULT 100,
+            seats INTEGER DEFAULT 1
+        )
+        """
+    )
 
 
 def init_db_path(db_path: Path) -> None:

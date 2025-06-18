@@ -135,3 +135,13 @@ is currently recalled.
 
 
 
+
+## Billing & Plans
+
+RecallHero offers three plans managed via Stripe:
+
+- **RecallHero Pro – Monthly** – $9 per user per month (10k API calls)
+- **RecallHero Enterprise Seat** – $15 per seat per month
+- **RecallHero Enterprise API Usage** – $0.01 per 100 calls (metered)
+
+Use the CLI script `python cli_tools/setup_stripe.py` to create these products in your Stripe account. The backend exposes `/api/billing/checkout` and `/api/billing/portal` endpoints for subscription management. Monthly API quotas are reset by a Celery task.

@@ -241,3 +241,15 @@ def poll_remedy_updates() -> None:
                     send_alert.delay(res.lastrowid, subj)
                 else:
                     send_alert(res.lastrowid, subj)
+
+
+@celery.task
+def reset_monthly_quotas() -> None:
+    """Reset API quotas based on plan at the start of each month."""
+    with SessionLocal() as db:
+        db.execute(
+            text(
+                "UPDATE stripe_customers SET quota = CASE plan WHEN 'free' THEN 100 WHEN 'pro' THEN 10000 ELSE quota END"
+            )
+        )
+        db.commit()
