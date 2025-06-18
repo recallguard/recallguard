@@ -6,16 +6,24 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 
-def render_template(name: str, context: dict) -> str:
-    path = Path('emails') / name
+def parse_language(header: str | None) -> str:
+    if header and header.lower().startswith('es'):
+        return 'es'
+    return 'en'
+
+
+def render_template(name: str, context: dict, lang: str = 'en') -> str:
+    path = Path('emails') / lang / name
+    if not path.exists():
+        path = Path('emails') / name
     html = path.read_text()
     for key, val in context.items():
         html = html.replace(f"{{{{{key}}}}}", str(val))
     return html
 
 
-def send_email(to_email: str, subject: str, template: str, context: dict) -> None:
-    html = render_template(template, context)
+def send_email(to_email: str, subject: str, template: str, context: dict, lang: str = 'en') -> None:
+    html = render_template(template, context, lang)
     api_key = getenv("SENDGRID_API_KEY")
     message = Mail(
         from_email=getenv("ALERTS_FROM_EMAIL", "noreply@example.com"),
