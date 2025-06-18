@@ -34,6 +34,12 @@ export default function Dashboard() {
             {r.hazard}
           </Badge>
           <Badge>{r.source.toUpperCase()}</Badge>
+          {r.summary_text && (
+            <Text mt={2} fontSize="sm">{r.summary_text}</Text>
+          )}
+          {r.next_steps && (
+            <Text mt={2} fontSize="sm" color="green.700">{r.next_steps}</Text>
+          )}
           <Text mt={2} fontSize="sm">
             {r.recall_date}
           </Text>

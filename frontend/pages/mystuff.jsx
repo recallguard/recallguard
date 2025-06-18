@@ -77,6 +77,9 @@ export default function MyStuff() {
             {list.map((it) => (
               <li key={it.id}>
                 {it.label || it.upc} - {it.status === 'recalled' ? '⚠️ Recalled' : '✅ Safe'}
+                {it.update_count > 0 && (
+                  <span data-testid="update-badge"> ({it.update_count})</span>
+                )}
                 <button onClick={() => remove(it.id)}>Delete</button>
               </li>
             ))}
