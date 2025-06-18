@@ -7,6 +7,7 @@ from sqlalchemy import (
     Text,
     ForeignKey,
     PrimaryKeyConstraint,
+    UniqueConstraint,
     text,
 )
 
@@ -81,4 +82,26 @@ user_items = Table(
     Column("label", String),
     Column("profile", String, nullable=False, server_default="self"),
     Column("added_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+)
+
+# FCM push notification tokens
+push_tokens = Table(
+    "push_tokens",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("token", String, nullable=False),
+    Column("added_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
+    PrimaryKeyConstraint("id"),
+    UniqueConstraint("user_id", "token")
+)
+
+# One-click e-mail unsubscribe tokens
+email_unsub_tokens = Table(
+    "email_unsub_tokens",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("token", String, nullable=False, unique=True),
+    Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
