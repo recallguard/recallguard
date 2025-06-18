@@ -134,6 +134,7 @@ def create_app() -> Flask:
         recalls = get_recalls_for_vin(vin)
         return jsonify(recalls)
 
+
     @app.get("/api/check/<upc>")
     def check_upc(upc: str):
         if not upc.isdigit():
@@ -161,6 +162,7 @@ def create_app() -> Flask:
                 "url": m["url"],
             }
         )
+
 
     @app.post("/api/recalls/refresh")
     @jwt_required

@@ -111,6 +111,7 @@ GET /api/recalls/vin/<vin>
 Provide a 17 character alphanumeric VIN. The route returns any matching recalls
 but does not automatically generate alerts.
 
+
 ## Scan & Check
 
 Visit `/scan` in the frontend to open a barcode or QR scanner using your
@@ -119,5 +120,6 @@ camera. When a code is detected, the browser calls
 JSON response of `{ status: "safe" }` indicates no recall. If a recall is
 found, the response includes the recall ID, product name, hazard and link
 to more details.
+
 
 
