@@ -1,14 +1,20 @@
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim AS build
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
 
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend     ./backend
+COPY alembic     ./alembic
+COPY alembic.ini ./alembic.ini
+COPY run.py      ./run.py
+
+# ───────── runtime  ─────────
 FROM python:3.12-slim
-ENV PYTHONUNBUFFERED=1
 WORKDIR /app
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
-COPY backend backend
-COPY alembic alembic
-COPY alembic.ini alembic.ini
+ENV PYTHONUNBUFFERED=1 PATH=/root/.local/bin:$PATH
+
+COPY --from=build /usr/local/lib/python*/site-packages /usr/local/lib/python*/site-packages
+COPY --from=build /app /app
+
 CMD ["celery", "-A", "backend.tasks", "worker", "--loglevel=info"]

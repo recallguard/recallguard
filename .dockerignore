@@ -1,0 +1,20 @@
+####################  General ####################
+**/__pycache__
+**/*.py[co]
+*.egg-info
+*.log
+.env
+.git
+.gitignore
+
+####################  Node / Next.js #############
+frontend/.next
+frontend/node_modules
+
+####################  WHAT WE KEEP  ##############
+!backend/
+!alembic/
+!alembic.ini
+!frontend/
+!shared/
+!requirements.txt
