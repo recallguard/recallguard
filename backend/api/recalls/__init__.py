@@ -13,3 +13,4 @@ def fetch_all(use_cache: bool = True) -> list:
     for func in (fetch_cpsc, fetch_fda, fetch_usda, fetch_nhtsa, fetch_misc):
         recalls.extend(func(use_cache=use_cache))
     return recalls
+from .router import router

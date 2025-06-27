@@ -9,8 +9,8 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     UniqueConstraint,
     text,
-    JSON,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 
 metadata = MetaData()
 
@@ -21,7 +21,7 @@ users = Table(
     Column("email", String, nullable=False, unique=True),
     Column("password_hash", String, nullable=False),
     Column("created_at", String, nullable=False),
-    Column("email_opt_in", Integer, nullable=False, server_default="0"),
+    Column("email_opt_in", Integer, nullable=False, server_default=text("0")),
 )
 
 products = Table(
@@ -43,7 +43,7 @@ recalls = Table(
     Column("fetched_at", String, nullable=False),
     Column("summary_text", Text),
     Column("next_steps", Text),
-    Column("remedy_updates", JSON, server_default="[]"),
+    Column("remedy_updates", JSONB, server_default=text("'[]'::jsonb")),
     PrimaryKeyConstraint("id", "source"),
 )
 
@@ -76,7 +76,6 @@ sent_notifications = Table(
     Column("recall_id", String, primary_key=True),
 )
 
-# Items saved by users via the "My Stuff" locker
 user_items = Table(
     "user_items",
     metadata,
@@ -84,11 +83,10 @@ user_items = Table(
     Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
     Column("upc", String, nullable=False),
     Column("label", String),
-    Column("profile", String, nullable=False, server_default="self"),
+    Column("profile", String, nullable=False, server_default=text("'self'")),
     Column("added_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
 
-# FCM push notification tokens
 push_tokens = Table(
     "push_tokens",
     metadata,
@@ -100,7 +98,6 @@ push_tokens = Table(
     UniqueConstraint("user_id", "token")
 )
 
-# One-click e-mail unsubscribe tokens
 email_unsub_tokens = Table(
     "email_unsub_tokens",
     metadata,
@@ -110,20 +107,18 @@ email_unsub_tokens = Table(
     Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
 
-# API keys for partner access
 api_keys = Table(
     "api_keys",
     metadata,
     Column("id", Integer, primary_key=True),
     Column("org_name", String, nullable=False),
     Column("key", String, nullable=False, unique=True),
-    Column("plan", String, server_default="free"),
-    Column("monthly_quota", Integer, server_default="5000"),
-    Column("requests_this_month", Integer, server_default="0"),
+    Column("plan", String, server_default=text("'free'")),
+    Column("monthly_quota", Integer, server_default=text("5000")),
+    Column("requests_this_month", Integer, server_default=text("0")),
     Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
 
-# Slack/Teams channel subscriptions
 channel_subs = Table(
     "channel_subs",
     metadata,
@@ -131,11 +126,10 @@ channel_subs = Table(
     Column("platform", String),
     Column("channel_id", String, nullable=False),
     Column("query", String, nullable=False),
-    Column("source", String, server_default="CPSC"),
+    Column("source", String, server_default=text("'CPSC'")),
     Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
 
-# Partner webhooks
 webhooks = Table(
     "webhooks",
     metadata,
@@ -147,7 +141,6 @@ webhooks = Table(
     Column("created_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
 
-# Friend invite tracking
 invites = Table(
     "invites",
     metadata,
@@ -157,7 +150,6 @@ invites = Table(
     Column("sent_at", String, nullable=False, server_default=text("CURRENT_TIMESTAMP")),
 )
 
-# Stripe billing info
 stripe_customers = Table(
     "stripe_customers",
     metadata,
@@ -165,7 +157,7 @@ stripe_customers = Table(
     Column("user_id", Integer, ForeignKey("users.id"), unique=True),
     Column("stripe_customer_id", String),
     Column("subscription_id", String),
-    Column("plan", String, server_default="free"),
-    Column("quota", Integer, server_default="100"),
-    Column("seats", Integer, server_default="1"),
+    Column("plan", String, server_default=text("'free'")),
+    Column("quota", Integer, server_default=text("100")),
+    Column("seats", Integer, server_default=text("1")),
 )
