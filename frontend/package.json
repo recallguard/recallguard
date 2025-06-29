@@ -19,11 +19,13 @@
     "@recallhero/shared": "file:../shared",
     "framer-motion": "^12.19.1",
     "html5-qrcode": "^2.3.8",
+    "i18next": "^25.2.1",
     "lucide-react": "^0.367.0",
-    "next": "^14.1.0",
+    "next": "^14.2.30",
     "next-i18next": "^14.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^15.5.3",
     "react-markdown": "^9.0.1"
   },
   "devDependencies": {
